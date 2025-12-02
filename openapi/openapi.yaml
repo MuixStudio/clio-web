@@ -1,0 +1,1998 @@
+openapi: 3.0.0
+info:
+  title: Clio API v1
+  version: 1.0.0
+  description: API documentation for Clio microservice platform
+  contact:
+    name: API Support
+    email: support@muixstudio.com
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization operations
+  - name: Tenant
+    description: Tenant management operations
+  - name: User
+    description: User management operations
+
+paths:
+  # Authentication Endpoints
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register User
+      description: Creates a new user account with email and password
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              example1:
+                summary: Register with email and password
+                value:
+                  email: user@example.com
+                  password: SecureP@ssw0rd
+                  name: John Doe
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login
+      description: Authenticates user with email and password, returns access token and refresh token in cookies
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              example1:
+                summary: Login with email and password
+                value:
+                  email: user@example.com
+                  password: SecureP@ssw0rd
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              description: Sets access_token and refresh_token as HttpOnly cookies
+              schema:
+                type: string
+                example: access_token=jwt_token_here; Path=/; HttpOnly
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout
+      description: Logs out the user by revoking refresh token and clearing cookies
+      operationId: logout
+      parameters:
+        - name: refresh_token
+          in: cookie
+          description: Refresh token cookie (optional)
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Logout successful
+          headers:
+            Set-Cookie:
+              description: Clears access_token and refresh_token cookies
+              schema:
+                type: string
+                example: access_token=; Path=/; HttpOnly; Max-Age=-1
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/LogoutResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/refresh_token:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh Access Token
+      description: Refreshes the access token using refresh token from cookie
+      operationId: refreshToken
+      parameters:
+        - name: refresh_token
+          in: cookie
+          description: Refresh token cookie
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Token refreshed successfully
+          headers:
+            Set-Cookie:
+              description: Sets new access_token and refresh_token as HttpOnly cookies
+              schema:
+                type: string
+                example: access_token=new_jwt_token_here; Path=/; HttpOnly
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RefreshTokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/github/login:
+    get:
+      tags:
+        - Authentication
+      summary: GitHub OAuth Login
+      description: Initiates GitHub OAuth flow by redirecting to GitHub authorization page
+      operationId: githubLogin
+      responses:
+        '302':
+          description: Redirects to GitHub OAuth authorization page
+          headers:
+            Location:
+              description: GitHub OAuth authorization URL
+              schema:
+                type: string
+                format: uri
+                example: https://github.com/login/oauth/authorize?client_id=...&state=...
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/github/callback:
+    get:
+      tags:
+        - Authentication
+      summary: GitHub OAuth Callback
+      description: Handles GitHub OAuth callback, creates or updates user, and returns tokens in cookies
+      operationId: githubCallback
+      parameters:
+        - name: code
+          in: query
+          description: OAuth authorization code from GitHub
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: query
+          description: CSRF protection state parameter
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirects to frontend application with tokens set in cookies
+          headers:
+            Location:
+              description: Frontend application URL
+              schema:
+                type: string
+                format: uri
+                example: http://localhost:3000/dashboard
+            Set-Cookie:
+              description: Sets access_token and refresh_token as HttpOnly cookies
+              schema:
+                type: string
+                example: access_token=jwt_token_here; Path=/; HttpOnly
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # API Endpoints
+  /api/v1/tenants:
+    get:
+      tags:
+        - Tenant
+      summary: List Tenants
+      description: Gets paginated list of tenants with optional filters, keyword search, and sorting
+      operationId: listTenants
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: page_size
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+        - name: keyword
+          in: query
+          description: Keyword search for name or tenant_name
+          required: false
+          schema:
+            type: string
+          example: acme
+        - name: plan_type
+          in: query
+          description: Filter by plan type
+          required: false
+          schema:
+            $ref: '#/components/schemas/TenantPlanType'
+        - name: status
+          in: query
+          description: Filter by status
+          required: false
+          schema:
+            $ref: '#/components/schemas/TenantStatus'
+        - name: sort_by
+          in: query
+          description: Sort by field
+          required: false
+          schema:
+            type: string
+            enum:
+              - name
+              - tenant_name
+              - created_at
+              - updated_at
+            default: updated_at
+          example: created_at
+        - name: order
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+          example: desc
+      responses:
+        '200':
+          description: Tenants retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ListTenantsResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/tenants/search:
+    post:
+      tags:
+        - Tenant
+      summary: Search Tenants
+      description: Search tenants with complex filters including time ranges, number ranges, and keyword search
+      operationId: searchTenants
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchTenantsRequest'
+            examples:
+              example1:
+                summary: Search with keyword and filters
+                value:
+                  page: 1
+                  page_size: 10
+                  keyword: acme
+                  plan_type: ["pro", "enterprise"]
+                  status: ["active"]
+                  max_users:
+                    gte: 50
+                  created_at:
+                    gte: "2024-01-01T00:00:00Z"
+                    lt: "2024-12-31T23:59:59Z"
+      responses:
+        '200':
+          description: Tenants searched successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/SearchTenantsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/tenant:
+    post:
+      tags:
+        - Tenant
+      summary: Create Tenant
+      description: Creates a new tenant with the provided information. Returns error if tenant name already exists.
+      operationId: createTenant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantRequest'
+            examples:
+              example1:
+                summary: Example tenant creation
+                value:
+                  tenant_name: acme_corp
+                  name: Acme Corporation
+                  logo_url: https://example.com/logo.png
+      responses:
+        '200':
+          description: Tenant created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CreateTenantResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    get:
+      tags:
+        - Tenant
+      summary: Get Current Tenant
+      description: Gets current tenant details (tenant_id injected from authentication context)
+      operationId: getTenant
+      responses:
+        '200':
+          description: Tenant retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/GetTenantResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      tags:
+        - Tenant
+      summary: Update Current Tenant
+      description: Updates current tenant information (tenant_id injected from authentication context)
+      operationId: updateTenant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTenantRequest'
+            examples:
+              example1:
+                summary: Update tenant name and logo
+                value:
+                  name: Updated Acme Corporation
+                  logo_url: https://example.com/updated-logo.png
+      responses:
+        '200':
+          description: Tenant updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UpdateTenantResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags:
+        - Tenant
+      summary: Delete Current Tenant
+      description: Deletes current tenant (tenant_id injected from authentication context)
+      operationId: deleteTenant
+      responses:
+        '200':
+          description: Tenant deleted successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DeleteTenantResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/user:
+    post:
+      tags:
+        - User
+      summary: Create Local User
+      description: Creates a new local user in current tenant (tenant_id injected from authentication context). Only local users can be created through this API. Password is required.
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+            examples:
+              example1:
+                summary: Create local user with password
+                value:
+                  name: John Doe
+                  password: SecureP@ssw0rd
+                  email: john.doe@example.com
+                  phone: "+1234567890"
+                  country_code: "+1"
+                  identity: ordinary
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CreateUserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags:
+        - User
+      summary: Delete Current User
+      description: Deletes current user (user_id injected from authentication context)
+      operationId: deleteCurrentUser
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DeleteUserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/userinfo:
+    get:
+      tags:
+        - User
+      summary: Get Current User Info
+      description: Gets current user information (user_id injected from authentication context)
+      operationId: getCurrentUserInfo
+      responses:
+        '200':
+          description: User info retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/GetUserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/user/profile:
+    get:
+      tags:
+        - User
+      summary: Get Current User Profile
+      description: Gets current user profile information (user_id injected from authentication context)
+      operationId: getCurrentUserProfile
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/GetUserProfileResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      tags:
+        - User
+      summary: Update Current User Profile
+      description: Updates current user profile information (user_id injected from authentication context). Only allows updating avatar_url, timezone, locale, and name.
+      operationId: updateCurrentUserProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
+            examples:
+              updateProfile:
+                summary: Update current user profile
+                value:
+                  name: John Updated Doe
+                  avatar_url: https://example.com/avatar.png
+                  timezone: America/New_York
+                  locale: en_US
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UpdateUserProfileResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/user/email:
+    put:
+      tags:
+        - User
+      summary: Update Current User Email
+      description: Updates current user email (user_id injected from authentication context)
+      operationId: updateCurrentUserEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserEmailRequest'
+            examples:
+              updateEmail:
+                summary: Update current user email
+                value:
+                  email: newemail@example.com
+      responses:
+        '200':
+          description: User email updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UpdateUserEmailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/user/phone:
+    put:
+      tags:
+        - User
+      summary: Update Current User Phone
+      description: Updates current user phone number (user_id injected from authentication context)
+      operationId: updateCurrentUserPhone
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserPhoneRequest'
+            examples:
+              updatePhone:
+                summary: Update current user phone
+                value:
+                  phone: "+9876543210"
+                  country_code: "+98"
+      responses:
+        '200':
+          description: User phone updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UpdateUserPhoneResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/users:
+    get:
+      tags:
+        - User
+      summary: List Users
+      description: Gets paginated list of users in current tenant (tenant_id injected from authentication context) with optional filters, keyword search, and sorting
+      operationId: listUsers
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: page_size
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+        - name: keyword
+          in: query
+          description: Keyword search for name or email
+          required: false
+          schema:
+            type: string
+          example: john
+        - name: identity
+          in: query
+          description: Filter by user identity
+          required: false
+          schema:
+            $ref: '#/components/schemas/UserIdentity'
+        - name: status
+          in: query
+          description: Filter by status
+          required: false
+          schema:
+            $ref: '#/components/schemas/UserStatus'
+        - name: auth_provider
+          in: query
+          description: Filter by authentication provider
+          required: false
+          schema:
+            $ref: '#/components/schemas/AuthProvider'
+        - name: sort_by
+          in: query
+          description: Sort by field
+          required: false
+          schema:
+            type: string
+            enum:
+              - name
+              - email
+              - created_at
+              - updated_at
+              - last_login_at
+            default: updated_at
+          example: created_at
+        - name: order
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+          example: desc
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ListUsersResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/users/search:
+    post:
+      tags:
+        - User
+      summary: Search Users
+      description: Search users in current tenant (tenant_id injected from authentication context) with complex filters including time ranges and keyword search
+      operationId: searchUsers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchUsersRequest'
+            examples:
+              example1:
+                summary: Search with keyword and filters
+                value:
+                  page: 1
+                  page_size: 10
+                  keyword: john
+                  identity: ["ordinary", "admin"]
+                  status: ["active"]
+                  auth_provider: ["local", "ldap"]
+                  created_at:
+                    gte: "2024-01-01T00:00:00Z"
+                    lt: "2024-12-31T23:59:59Z"
+      responses:
+        '200':
+          description: Users searched successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/SearchUsersResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/user/{user_id}:
+    get:
+      tags:
+        - User
+      summary: Get User
+      description: Gets user details by user_id
+      operationId: getUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/GetUserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags:
+        - User
+      summary: Delete User
+      description: Deletes a user by user_id
+      operationId: deleteUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DeleteUserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/user/{user_id}/profile:
+    get:
+      tags:
+        - User
+      summary: Get User Profile
+      description: Gets user profile information by user_id
+      operationId: getUserProfile
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/GetUserProfileResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      tags:
+        - User
+      summary: Update User Profile
+      description: Updates user profile information including avatar_url, timezone, locale, and name. Other fields like status, identity, email cannot be updated through this endpoint.
+      operationId: updateUserProfile
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
+            examples:
+              updateProfile:
+                summary: Update user profile
+                value:
+                  name: John Updated Doe
+                  avatar_url: https://example.com/avatar.png
+                  timezone: America/New_York
+                  locale: en_US
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UpdateUserProfileResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/user/{user_id}/email:
+    put:
+      tags:
+        - User
+      summary: Update User Email
+      description: Updates user email by user_id
+      operationId: updateUserEmail
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserEmailRequest'
+            examples:
+              updateEmail:
+                summary: Update user email
+                value:
+                  email: newemail@example.com
+      responses:
+        '200':
+          description: User email updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UpdateUserEmailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/user/{user_id}/phone:
+    put:
+      tags:
+        - User
+      summary: Update User Phone
+      description: Updates user phone number by user_id
+      operationId: updateUserPhone
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserPhoneRequest'
+            examples:
+              updatePhone:
+                summary: Update user phone
+                value:
+                  phone: "+9876543210"
+                  country_code: "+98"
+      responses:
+        '200':
+          description: User phone updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UpdateUserPhoneResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  parameters:
+    UserId:
+      name: user_id
+      in: path
+      description: User UUID
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: 660e8400-e29b-41d4-a716-446655440000
+
+  schemas:
+    # Authentication Schemas
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - name
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 60
+          description: User email address
+          example: user@example.com
+        password:
+          type: string
+          minLength: 8
+          maxLength: 100
+          description: User password
+          example: SecureP@ssw0rd
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+          description: User display name
+          example: John Doe
+
+    RegisterResponse:
+      type: object
+      required:
+        - user_id
+        - email
+        - name
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: Created user UUID
+          example: 660e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          description: User email
+          example: user@example.com
+        name:
+          type: string
+          description: User display name
+          example: John Doe
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: user@example.com
+        password:
+          type: string
+          description: User password
+          example: SecureP@ssw0rd
+
+    LoginResponse:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+        - expires_in
+        - token_type
+        - user
+      properties:
+        access_token:
+          type: string
+          description: JWT access token (also set in HttpOnly cookie)
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refresh_token:
+          type: string
+          description: Refresh token (also set in HttpOnly cookie)
+          example: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+        expires_in:
+          type: integer
+          format: int64
+          description: Access token expiration time in seconds
+          example: 86400
+        token_type:
+          type: string
+          description: Token type
+          example: Bearer
+        user:
+          $ref: '#/components/schemas/AuthUserInfo'
+
+    AuthUserInfo:
+      type: object
+      required:
+        - user_id
+        - email
+        - name
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: User UUID
+          example: 660e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          description: User email
+          example: user@example.com
+        email_verified:
+          type: boolean
+          description: Email verification status
+          example: true
+        name:
+          type: string
+          description: User display name
+          example: John Doe
+        avatar_url:
+          type: string
+          format: uri
+          description: User avatar URL
+          example: https://example.com/avatar.png
+
+    LogoutResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Logout success message
+          example: Logout successful
+
+    RefreshTokenResponse:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+        - expires_in
+        - token_type
+      properties:
+        access_token:
+          type: string
+          description: New JWT access token (also set in HttpOnly cookie)
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refresh_token:
+          type: string
+          description: New refresh token (also set in HttpOnly cookie)
+          example: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+        expires_in:
+          type: integer
+          format: int64
+          description: Access token expiration time in seconds
+          example: 86400
+        token_type:
+          type: string
+          description: Token type
+          example: Bearer
+
+    # Common API Response
+    ApiResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code
+          example: 200
+        message:
+          type: string
+          description: Response message
+          example: success
+
+    # Error Response
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          description: Error code
+          example: 400
+        message:
+          type: string
+          description: Error message
+          example: Invalid request
+        metadata:
+          type: object
+          description: Additional error metadata
+          additionalProperties: true
+
+    # Tenant Status Enum
+    TenantStatus:
+      type: string
+      enum:
+        - active
+        - suspended
+        - trial
+        - expired
+        - deleted
+      description: Tenant status
+
+    # Tenant Plan Type Enum
+    TenantPlanType:
+      type: string
+      enum:
+        - free
+        - trial
+        - basic
+        - pro
+        - enterprise
+        - custom
+      description: Tenant plan type
+
+    # Tenant Info
+    TenantInfo:
+      type: object
+      required:
+        - tenant_id
+        - tenant_name
+        - name
+        - status
+        - plan_type
+        - max_users
+        - max_storage_gb
+        - created_at
+        - updated_at
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+          description: Tenant UUID
+          example: 550e8400-e29b-41d4-a716-446655440000
+        tenant_name:
+          type: string
+          description: Tenant unique name (identifier)
+          example: acme_corp
+        name:
+          type: string
+          description: Tenant display name
+          example: Acme Corporation
+        status:
+          $ref: '#/components/schemas/TenantStatus'
+        plan_type:
+          $ref: '#/components/schemas/TenantPlanType'
+        logo_url:
+          type: string
+          format: uri
+          description: Tenant logo URL
+          example: https://example.com/logo.png
+        max_users:
+          type: integer
+          format: int32
+          description: Maximum users
+          example: 10
+        max_storage_gb:
+          type: integer
+          format: int32
+          description: Maximum storage in GB
+          example: 5
+        trial_end_at:
+          type: string
+          format: date-time
+          description: Trial end time
+          example: 2024-12-31T23:59:59Z
+        subscription_start_at:
+          type: string
+          format: date-time
+          description: Subscription start time
+          example: 2024-01-01T00:00:00Z
+        subscription_end_at:
+          type: string
+          format: date-time
+          description: Subscription end time
+          example: 2024-12-31T23:59:59Z
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: 2024-01-01T00:00:00Z
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: 2024-01-01T00:00:00Z
+
+    # Create Tenant Request
+    CreateTenantRequest:
+      type: object
+      required:
+        - tenant_name
+        - name
+      properties:
+        tenant_name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Tenant unique name (identifier)
+          example: acme_corp
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Tenant display name
+          example: Acme Corporation
+        logo_url:
+          type: string
+          format: uri
+          maxLength: 500
+          description: Tenant logo URL (optional)
+          example: https://example.com/logo.png
+
+    # Create Tenant Response
+    CreateTenantResponse:
+      type: object
+      required:
+        - tenant
+      properties:
+        tenant:
+          $ref: '#/components/schemas/TenantInfo'
+
+    # Get Tenant Response
+    GetTenantResponse:
+      type: object
+      required:
+        - tenant
+      properties:
+        tenant:
+          $ref: '#/components/schemas/TenantInfo'
+
+    # Update Tenant Request
+    UpdateTenantRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Tenant display name
+          example: Updated Acme Corporation
+        logo_url:
+          type: string
+          format: uri
+          maxLength: 500
+          description: Tenant logo URL
+          example: https://example.com/new-logo.png
+
+    # Update Tenant Response
+    UpdateTenantResponse:
+      type: object
+      required:
+        - tenant
+      properties:
+        tenant:
+          $ref: '#/components/schemas/TenantInfo'
+
+    # Delete Tenant Response
+    DeleteTenantResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          description: Operation success status
+          example: true
+
+    # List Tenants Response
+    ListTenantsResponse:
+      type: object
+      required:
+        - tenants
+        - total
+      properties:
+        tenants:
+          type: array
+          description: Tenant list
+          items:
+            $ref: '#/components/schemas/TenantInfo'
+        total:
+          type: integer
+          format: int64
+          description: Total number of tenants
+          example: 100
+
+    # Time Range Filter
+    TimeRange:
+      type: object
+      properties:
+        gt:
+          type: string
+          format: date-time
+          description: Greater than
+          example: "2024-01-01T00:00:00Z"
+        gte:
+          type: string
+          format: date-time
+          description: Greater than or equal
+          example: "2024-01-01T00:00:00Z"
+        lt:
+          type: string
+          format: date-time
+          description: Less than
+          example: "2024-12-31T23:59:59Z"
+        lte:
+          type: string
+          format: date-time
+          description: Less than or equal
+          example: "2024-12-31T23:59:59Z"
+
+    # Number Range Filter
+    NumberRange:
+      type: object
+      properties:
+        gt:
+          type: integer
+          format: int32
+          description: Greater than
+          example: 10
+        gte:
+          type: integer
+          format: int32
+          description: Greater than or equal
+          example: 10
+        lt:
+          type: integer
+          format: int32
+          description: Less than
+          example: 100
+        lte:
+          type: integer
+          format: int32
+          description: Less than or equal
+          example: 100
+
+    # Search Tenants Request
+    SearchTenantsRequest:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: Page number
+          example: 1
+        page_size:
+          type: integer
+          minimum: 1
+          description: Number of items per page
+          example: 10
+        keyword:
+          type: string
+          description: Keyword search for name or tenant_name
+          example: acme
+        plan_type:
+          type: array
+          description: Filter by plan types (can match multiple)
+          items:
+            $ref: '#/components/schemas/TenantPlanType'
+          example: ["pro", "enterprise"]
+        status:
+          type: array
+          description: Filter by statuses (can match multiple)
+          items:
+            $ref: '#/components/schemas/TenantStatus'
+          example: ["active"]
+        created_at:
+          $ref: '#/components/schemas/TimeRange'
+        updated_at:
+          $ref: '#/components/schemas/TimeRange'
+        trial_end_at:
+          $ref: '#/components/schemas/TimeRange'
+        subscription_start_at:
+          $ref: '#/components/schemas/TimeRange'
+        subscription_end_at:
+          $ref: '#/components/schemas/TimeRange'
+        max_users:
+          $ref: '#/components/schemas/NumberRange'
+        max_storage_gb:
+          $ref: '#/components/schemas/NumberRange'
+
+    # Search Tenants Response
+    SearchTenantsResponse:
+      type: object
+      required:
+        - tenants
+        - total
+      properties:
+        tenants:
+          type: array
+          description: Tenant list
+          items:
+            $ref: '#/components/schemas/TenantInfo'
+        total:
+          type: integer
+          format: int64
+          description: Total number of tenants
+          example: 100
+
+    # User Identity Enum
+    UserIdentity:
+      type: string
+      enum:
+        - admin
+        - ordinary
+        - service_account
+      description: User identity type
+
+    # User Status Enum
+    UserStatus:
+      type: string
+      enum:
+        - active
+        - disabled
+        - inactive
+      description: User status
+
+    # Auth Provider Enum
+    AuthProvider:
+      type: string
+      enum:
+        - local
+        - ldap
+        - oauth2
+        - oidc
+        - saml2
+      description: Authentication provider type
+
+    # User Info (without password)
+    UserInfo:
+      type: object
+      required:
+        - user_id
+        - tenant_id
+        - name
+        - identity
+        - status
+        - auth_provider
+        - created_at
+        - updated_at
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: User UUID
+          example: 660e8400-e29b-41d4-a716-446655440000
+        tenant_id:
+          type: string
+          format: uuid
+          description: Tenant UUID
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          description: User display name
+          example: John Doe
+        email:
+          type: string
+          format: email
+          description: User email
+          example: john.doe@example.com
+        phone:
+          type: string
+          description: Phone number
+          example: "+1234567890"
+        country_code:
+          type: string
+          description: Phone country code
+          example: "+1"
+        avatar_url:
+          type: string
+          format: uri
+          description: User avatar URL
+          example: https://example.com/avatar.png
+        timezone:
+          type: string
+          description: User timezone
+          example: UTC
+        locale:
+          type: string
+          description: User locale
+          example: en_US
+        identity:
+          $ref: '#/components/schemas/UserIdentity'
+        status:
+          $ref: '#/components/schemas/UserStatus'
+        auth_provider:
+          $ref: '#/components/schemas/AuthProvider'
+        last_login_at:
+          type: string
+          format: date-time
+          description: Last login time
+          example: 2024-01-15T10:30:00Z
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: 2024-01-01T00:00:00Z
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: 2024-01-01T00:00:00Z
+
+    # Create User Request
+    CreateUserRequest:
+      type: object
+      required:
+        - name
+        - password
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+          description: User display name
+          example: John Doe
+        password:
+          type: string
+          minLength: 8
+          maxLength: 100
+          description: User password (required for local authentication)
+          example: SecureP@ssw0rd
+        email:
+          type: string
+          format: email
+          maxLength: 60
+          description: User email
+          example: john.doe@example.com
+        phone:
+          type: string
+          maxLength: 60
+          description: Phone number
+          example: "+1234567890"
+        country_code:
+          type: string
+          maxLength: 60
+          description: Phone country code
+          example: "+1"
+        avatar_url:
+          type: string
+          format: uri
+          maxLength: 500
+          description: User avatar URL
+          example: https://example.com/avatar.png
+        timezone:
+          type: string
+          maxLength: 50
+          description: User timezone
+          default: UTC
+          example: America/New_York
+        locale:
+          type: string
+          maxLength: 10
+          description: User locale
+          default: en_US
+          example: zh_CN
+        identity:
+          $ref: '#/components/schemas/UserIdentity'
+          default: ordinary
+
+    # Create User Response
+    CreateUserResponse:
+      type: object
+      required:
+        - user_id
+        - name
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: Created user UUID
+          example: 660e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          description: User display name
+          example: John Doe
+
+    # Get User Response
+    GetUserResponse:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          $ref: '#/components/schemas/UserInfo'
+
+    # Update User Profile Request
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+          description: User display name
+          example: John Updated Doe
+        avatar_url:
+          type: string
+          format: uri
+          maxLength: 500
+          description: User avatar URL
+          example: https://example.com/avatar.png
+        timezone:
+          type: string
+          maxLength: 50
+          description: User timezone
+          example: America/New_York
+        locale:
+          type: string
+          maxLength: 10
+          description: User locale
+          example: zh_CN
+
+    # Update User Profile Response
+    UpdateUserProfileResponse:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          $ref: '#/components/schemas/UserInfo'
+
+    # Get User Profile Response
+    GetUserProfileResponse:
+      type: object
+      required:
+        - profile
+      properties:
+        profile:
+          type: object
+          properties:
+            name:
+              type: string
+              description: User display name
+              example: John Doe
+            avatar_url:
+              type: string
+              format: uri
+              description: User avatar URL
+              example: https://example.com/avatar.png
+            timezone:
+              type: string
+              description: User timezone
+              example: America/New_York
+            locale:
+              type: string
+              description: User locale
+              example: en_US
+
+    # Update User Email Request
+    UpdateUserEmailRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 60
+          description: New email address
+          example: newemail@example.com
+
+    # Update User Email Response
+    UpdateUserEmailResponse:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          $ref: '#/components/schemas/UserInfo'
+
+    # Update User Phone Request
+    UpdateUserPhoneRequest:
+      type: object
+      required:
+        - phone
+      properties:
+        phone:
+          type: string
+          maxLength: 60
+          description: New phone number
+          example: "+9876543210"
+        country_code:
+          type: string
+          maxLength: 60
+          description: Phone country code
+          example: "+98"
+
+    # Update User Phone Response
+    UpdateUserPhoneResponse:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          $ref: '#/components/schemas/UserInfo'
+
+    # Delete User Response
+    DeleteUserResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          description: Operation success status
+          example: true
+
+    # List Users Response
+    ListUsersResponse:
+      type: object
+      required:
+        - users
+        - total
+      properties:
+        users:
+          type: array
+          description: User list
+          items:
+            $ref: '#/components/schemas/UserInfo'
+        total:
+          type: integer
+          format: int64
+          description: Total number of users
+          example: 100
+
+    # Search Users Request
+    SearchUsersRequest:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: Page number
+          example: 1
+        page_size:
+          type: integer
+          minimum: 1
+          description: Number of items per page
+          example: 10
+        keyword:
+          type: string
+          description: Keyword search for name or email
+          example: john
+        identity:
+          type: array
+          description: Filter by user identities (can match multiple)
+          items:
+            $ref: '#/components/schemas/UserIdentity'
+          example: ["ordinary", "admin"]
+        status:
+          type: array
+          description: Filter by statuses (can match multiple)
+          items:
+            $ref: '#/components/schemas/UserStatus'
+          example: ["active"]
+        auth_provider:
+          type: array
+          description: Filter by auth providers (can match multiple)
+          items:
+            $ref: '#/components/schemas/AuthProvider'
+          example: ["local", "ldap"]
+        created_at:
+          $ref: '#/components/schemas/TimeRange'
+        updated_at:
+          $ref: '#/components/schemas/TimeRange'
+        last_login_at:
+          $ref: '#/components/schemas/TimeRange'
+
+    # Search Users Response
+    SearchUsersResponse:
+      type: object
+      required:
+        - users
+        - total
+      properties:
+        users:
+          type: array
+          description: User list
+          items:
+            $ref: '#/components/schemas/UserInfo'
+        total:
+          type: integer
+          format: int64
+          description: Total number of users
+          example: 100
+
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+      description: JWT access token stored in HttpOnly cookie
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Authentication required or invalid credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            message: Invalid credentials
+
+    BadRequest:
+      description: Bad request - Invalid input parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 400
+            message: Invalid request parameters
+            metadata:
+              field: tenant_name
+              error: must be at least 2 characters
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 404
+            message: Tenant not found
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            message: Internal server error

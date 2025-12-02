@@ -1,0 +1,122 @@
+"use client";
+
+import Link from "next/link";
+import { ChevronRight, type LucideIcon } from "lucide-react";
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from "@/components/ui/sidebar";
+import { useIsActive, useActivePath } from "@/hooks/use-active-item";
+
+/**
+ * 单个导航菜单项组件
+ */
+function NavMainItem({
+  item,
+}: {
+  item: {
+    title: string;
+    url: string;
+    icon?: LucideIcon;
+    isActive?: boolean;
+    items?: {
+      title: string;
+      url: string;
+    }[];
+  };
+}) {
+  // 检查当前菜单项是否激活
+  const isItemActive = useIsActive(item.url);
+
+  // 检查是否有激活的子项
+  const pathname = useActivePath();
+  const hasActiveChild = item.items?.some((subItem) =>
+    pathname.startsWith(subItem.url),
+  );
+
+  // 决定是否应该展开
+  const shouldOpen = item.isActive || isItemActive || hasActiveChild;
+
+  return (
+    <Collapsible asChild defaultOpen={shouldOpen} className="group/collapsible">
+      <SidebarMenuItem>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuButton tooltip={item.title} isActive={isItemActive}>
+            {item.icon && <item.icon />}
+            <span>{item.title}</span>
+            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+          </SidebarMenuButton>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {item.items?.map((subItem) => (
+              <NavMainSubItem key={subItem.title} subItem={subItem} />
+            ))}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
+  );
+}
+
+/**
+ * 子菜单项组件
+ */
+function NavMainSubItem({
+  subItem,
+}: {
+  subItem: {
+    title: string;
+    url: string;
+  };
+}) {
+  const isActive = useIsActive(subItem.url);
+
+  return (
+    <SidebarMenuSubItem>
+      <SidebarMenuSubButton asChild isActive={isActive}>
+        <Link href={subItem.url}>
+          <span>{subItem.title}</span>
+        </Link>
+      </SidebarMenuSubButton>
+    </SidebarMenuSubItem>
+  );
+}
+
+export function NavMain({
+  items,
+}: {
+  items: {
+    title: string;
+    url: string;
+    icon?: LucideIcon;
+    isActive?: boolean;
+    items?: {
+      title: string;
+      url: string;
+    }[];
+  }[];
+}) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarMenu>
+        {items.map((item) => (
+          <NavMainItem key={item.title} item={item} />
+        ))}
+      </SidebarMenu>
+    </SidebarGroup>
+  );
+}
