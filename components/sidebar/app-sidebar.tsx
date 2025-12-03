@@ -7,7 +7,7 @@ import useSWR from "swr";
 import { NavMain } from "@/components/sidebar/nav-main";
 import { NavProjects } from "@/components/sidebar/nav-projects";
 import { NavUser } from "@/components/sidebar/nav-user";
-import { TeamSwitcher } from "@/components/sidebar/team-switcher";
+import { TenantSwitcher } from "@/components/sidebar/tenant-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +20,7 @@ import { useNavItems } from "@/hooks/use-nav-items";
 import { useProjects } from "@/hooks/use-projects";
 import { useTeams } from "@/hooks/use-teams";
 import { getUserInfo } from "@/service/user";
+import { Tenant } from "@/components/sidebar/sidebar";
 
 export const AppSidebar: React.FC = ({
   ...props
@@ -50,7 +51,7 @@ export const AppSidebar: React.FC = ({
   const { teams, isLoading: teamsLoading } = useTeams();
 
   // 任何数据还在加载中，显示骨架屏
-  if (userLoading || projectsLoading || teamsLoading) {
+  if (projectsLoading || teamsLoading) {
     return (
       <Sidebar collapsible="icon" {...props}>
         <SidebarHeader>
@@ -71,15 +72,14 @@ export const AppSidebar: React.FC = ({
     );
   }
 
-  // 用户信息不存在，显示空状态
-  if (!userInfo) {
-    return null;
-  }
+  const tenantChanged = (tenant: Tenant) => {
+    console.log(tenant);
+  };
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher tenants={teams} />
+        <TenantSwitcher tenants={teams} onChange={tenantChanged} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navItems} />
@@ -88,9 +88,9 @@ export const AppSidebar: React.FC = ({
       <SidebarFooter>
         <NavUser
           user={{
-            name: userInfo.name || "Guest",
-            email: userInfo.email || "",
-            avatar: userInfo.avatar || "/avatars/default.jpg",
+            name: userInfo?.name || "Guest",
+            email: userInfo?.email || "",
+            avatar: userInfo?.avatar || "/avatars/default.jpg",
           }}
         />
       </SidebarFooter>

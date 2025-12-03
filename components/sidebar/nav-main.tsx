@@ -19,6 +19,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { useIsActive, useActivePath } from "@/hooks/use-active-item";
+import {Menu, NavItem} from "@/components/sidebar/sidebar";
 
 /**
  * 单个导航菜单项组件
@@ -26,16 +27,7 @@ import { useIsActive, useActivePath } from "@/hooks/use-active-item";
 function NavMainItem({
   item,
 }: {
-  item: {
-    title: string;
-    url: string;
-    icon?: LucideIcon;
-    isActive?: boolean;
-    items?: {
-      title: string;
-      url: string;
-    }[];
-  };
+  item: NavItem;
 }) {
   // 检查当前菜单项是否激活
   const isItemActive = useIsActive(item.url);
@@ -50,10 +42,10 @@ function NavMainItem({
   const shouldOpen = item.isActive || isItemActive || hasActiveChild;
 
   return (
-    <Collapsible asChild defaultOpen={shouldOpen} className="group/collapsible">
+    <Collapsible asChild className="group/collapsible" defaultOpen={shouldOpen}>
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
-          <SidebarMenuButton tooltip={item.title} isActive={isItemActive}>
+          <SidebarMenuButton isActive={isItemActive} tooltip={item.title}>
             {item.icon && <item.icon />}
             <span>{item.title}</span>
             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -95,28 +87,30 @@ function NavMainSubItem({
   );
 }
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string;
-    url: string;
-    icon?: LucideIcon;
-    isActive?: boolean;
-    items?: {
-      title: string;
-      url: string;
-    }[];
-  }[];
-}) {
+export function NavMain({ menu }: { menu: Menu }) {
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
-      <SidebarMenu>
-        {items.map((item) => (
-          <NavMainItem key={item.title} item={item} />
+    <>
+      <SidebarGroup>
+        {menu.navGroups.map((navGroup) => (
+          <>
+            <SidebarGroupLabel>{navGroup.name}</SidebarGroupLabel>
+            <SidebarMenu>
+              {navGroup.items.map((navItem) => (
+                <NavMainItem key={navItem.title} item={navItem} />
+              ))}
+            </SidebarMenu>
+          </>
         ))}
-      </SidebarMenu>
-    </SidebarGroup>
+      </SidebarGroup>
+    </>
   );
 }
+
+// <SidebarGroup>
+//   <SidebarGroupLabel>Platform</SidebarGroupLabel>
+//   <SidebarMenu>
+//     {items.map((item) => (
+//       <NavMainItem key={item.title} item={item} />
+//     ))}
+//   </SidebarMenu>
+// </SidebarGroup>

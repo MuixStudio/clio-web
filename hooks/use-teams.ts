@@ -3,7 +3,7 @@
 import useSWR from "swr";
 import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
 
-import type { Team } from "@/components/sidebar/sidebar";
+import type { Tenant } from "@/components/sidebar/sidebar";
 
 /**
  * 团队API响应类型
@@ -43,7 +43,7 @@ const logoMap: Record<string, any> = {
 /**
  * 自定义钩子：从API获取团队列表
  *
- * @returns {{ teams: Team[]; isLoading: boolean; error: any }}
+ * @returns {{ teams: Tenant[]; isLoading: boolean; error: any }}
  */
 export function useTeams() {
   const { data, error, isLoading } = useSWR<TeamResponse[]>(
@@ -57,7 +57,8 @@ export function useTeams() {
   );
 
   // 转换API数据为侧边栏团队格式
-  const teams: Team[] = (data || []).map((team) => ({
+  const teams: Tenant[] = (data || []).map((team) => ({
+    tenant_id: team.id,
     name: team.name,
     logo: logoMap[team.logo || "gallery"] || GalleryVerticalEnd,
     plan: team.plan,

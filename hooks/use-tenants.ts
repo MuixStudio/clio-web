@@ -4,7 +4,7 @@ import { useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
 
-import type { Team } from "@/components/sidebar/sidebar";
+import type { Tenant } from "@/components/sidebar/sidebar";
 import { useTenantContext } from "@/contexts/tenant-context";
 
 /**
@@ -47,7 +47,7 @@ const logoMap: Record<string, any> = {
  * 自定义钩子：从API获取租户列表
  * 自动初始化第一个租户作为当前租户
  *
- * @returns {{ tenants: Team[]; isLoading: boolean; error: any }}
+ * @returns {{ tenants: Tenant[]; isLoading: boolean; error: any }}
  */
 export function useTenants() {
   const { currentTenantId, setCurrentTenantId } = useTenantContext();
@@ -65,9 +65,9 @@ export function useTenants() {
   );
 
   // 使用 useMemo 缓存转换后的租户数据，避免不必要的重新计算
-  const tenants: Team[] = useMemo(() => {
+  const tenants: Tenant[] = useMemo(() => {
     return (data || []).map((tenant) => ({
-      id: tenant.id,
+      tenant_id: tenant.id,
       name: tenant.name,
       logo: logoMap[tenant.logo || "gallery"] || GalleryVerticalEnd,
       plan: tenant.plan,
@@ -77,7 +77,7 @@ export function useTenants() {
   // 自动初始化第一个租户（如果没有设置当前租户且租户列表已加载）
   useEffect(() => {
     if (!currentTenantId && tenants.length > 0) {
-      setCurrentTenantId(tenants[0].id);
+      setCurrentTenantId(tenants[0].tenant_id);
     }
   }, [currentTenantId, tenants, setCurrentTenantId]);
 

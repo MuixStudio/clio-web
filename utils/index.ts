@@ -28,3 +28,6 @@ export async function fetchWithRetry<T = any>(
     return [null, res];
   }
 }
+
+// 导出头像后备文本工具函数
+export { getAvatarFallback } from "./get-avatar-fallback";

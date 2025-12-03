@@ -16,7 +16,18 @@ export interface NavItem {
   items?: {
     title: string;
     url: string;
+    /** 菜单图标（Lucide图标组件） */
+    icon?: LucideIcon;
   }[];
+}
+
+export interface NavGroup {
+  name: string;
+  items: NavItem[];
+}
+
+export interface Menu {
+  navGroups: NavGroup[];
 }
 
 /**
