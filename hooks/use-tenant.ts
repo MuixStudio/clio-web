@@ -45,9 +45,9 @@ const logoMap: Record<string, any> = {
  *
  * @returns {{ teams: Tenant[]; isLoading: boolean; error: any }}
  */
-export function useTeams() {
+export function useTenant() {
   const { data, error, isLoading } = useSWR<TeamResponse[]>(
-    "/teams",
+    "/tenants",
     fetchTeams,
     {
       // 配置选项
@@ -57,15 +57,15 @@ export function useTeams() {
   );
 
   // 转换API数据为侧边栏团队格式
-  const teams: Tenant[] = (data || []).map((team) => ({
-    tenant_id: team.id,
-    name: team.name,
-    logo: logoMap[team.logo || "gallery"] || GalleryVerticalEnd,
-    plan: team.plan,
+  const tenants: Tenant[] = (data || []).map((tenant) => ({
+    tenant_id: tenant.id,
+    name: tenant.name,
+    logo: logoMap[tenant.logo || "gallery"] || GalleryVerticalEnd,
+    plan: tenant.plan,
   }));
 
   return {
-    teams,
+      tenants,
     isLoading,
     error,
   };

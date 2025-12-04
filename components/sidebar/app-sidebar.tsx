@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import useSWR from "swr";
 
 import { NavMain } from "@/components/sidebar/nav-main";
-import { NavProjects } from "@/components/sidebar/nav-projects";
 import { NavUser } from "@/components/sidebar/nav-user";
 import { TenantSwitcher } from "@/components/sidebar/tenant-switcher";
 import {
@@ -17,8 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavItems } from "@/hooks/use-nav-items";
-import { useProjects } from "@/hooks/use-projects";
-import { useTeams } from "@/hooks/use-teams";
+import { useTenant } from "@/hooks/use-tenant";
 import { getUserInfo } from "@/service/user";
 import { Tenant } from "@/components/sidebar/sidebar";
 
@@ -34,24 +32,27 @@ export const AppSidebar: React.FC = ({
   );
 
   // 根据用户角色获取导航菜单
-  const baseNavItems = useNavItems(userInfo?.role);
+  const menu = useNavItems(userInfo?.role);
 
   // 根据当前路径设置菜单激活状态
-  const navItems = React.useMemo(() => {
-    return baseNavItems.map((item) => ({
-      ...item,
-      isActive: pathname.startsWith(item.url),
-    }));
-  }, [baseNavItems, pathname]);
-
-  // 获取项目列表
-  const { projects, isLoading: projectsLoading } = useProjects();
+  const menuWithActiveState = React.useMemo(() => {
+    return {
+      ...menu,
+      navGroups: menu.navGroups.map((group) => ({
+        ...group,
+        items: group.items.map((item) => ({
+          ...item,
+          isActive: pathname.startsWith(item.url),
+        })),
+      })),
+    };
+  }, [menu, pathname]);
 
   // 获取团队列表
-  const { teams, isLoading: teamsLoading } = useTeams();
+  const { tenants, isLoading: teamsLoading } = useTenant();
 
   // 任何数据还在加载中，显示骨架屏
-  if (projectsLoading || teamsLoading) {
+  if (teamsLoading) {
     return (
       <Sidebar collapsible="icon" {...props}>
         <SidebarHeader>
@@ -79,11 +80,10 @@ export const AppSidebar: React.FC = ({
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TenantSwitcher tenants={teams} onChange={tenantChanged} />
+        <TenantSwitcher tenants={tenants} onChange={tenantChanged} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navItems} />
-        <NavProjects projects={projects} />
+        <NavMain menu={menuWithActiveState} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser
