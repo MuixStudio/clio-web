@@ -1,9 +1,9 @@
 "use client";
 
+import type { Tenant } from "@/components/sidebar/sidebar";
+
 import useSWR from "swr";
 import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
-
-import type { Tenant } from "@/components/sidebar/sidebar";
 
 /**
  * 团队API响应类型
@@ -65,7 +65,7 @@ export function useTenant() {
   }));
 
   return {
-      tenants,
+    tenants,
     isLoading,
     error,
   };

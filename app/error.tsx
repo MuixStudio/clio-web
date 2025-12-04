@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import { AlertCircle } from "lucide-react";
+
 import {
   Card,
   CardContent,
@@ -10,7 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle } from "lucide-react";
 
 export default function Error({
   error,
@@ -43,7 +44,7 @@ export default function Error({
           </p>
         </CardContent>
         <CardFooter>
-          <Button onClick={reset} variant="default" className="w-full">
+          <Button className="w-full" variant="default" onClick={reset}>
             Try again
           </Button>
         </CardFooter>

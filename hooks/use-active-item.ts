@@ -25,6 +25,7 @@ export function useIsActive(itemUrl: string, exact: boolean = false): boolean {
       if (itemUrl === "/") {
         return pathname === "/";
       }
+
       return pathname.startsWith(itemUrl);
     }
   }, [pathname, itemUrl, exact]);

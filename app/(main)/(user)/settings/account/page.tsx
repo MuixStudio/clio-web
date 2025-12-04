@@ -15,12 +15,18 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { post } from "@/service/base";
 
 interface PasswordFormData {
   currentPassword: string;
@@ -40,6 +46,7 @@ export default function AccountPage() {
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
     setPasswordForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -49,11 +56,13 @@ export default function AccountPage() {
     // 表单验证
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       toast.error("两次输入的新密码不一致");
+
       return;
     }
 
     if (passwordForm.newPassword.length < 8) {
       toast.error("密码长度至少为 8 位");
+
       return;
     }
 
@@ -117,9 +126,7 @@ export default function AccountPage() {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">账户安全</h3>
-        <p className="text-sm text-muted-foreground">
-          管理您的账户安全设置
-        </p>
+        <p className="text-sm text-muted-foreground">管理您的账户安全设置</p>
       </div>
       <Separator />
 
@@ -130,53 +137,51 @@ export default function AccountPage() {
             <Lock className="h-5 w-5" />
             <CardTitle>修改密码</CardTitle>
           </div>
-          <CardDescription>
-            定期修改密码可以提高账户安全性
-          </CardDescription>
+          <CardDescription>定期修改密码可以提高账户安全性</CardDescription>
         </CardHeader>
         <form onSubmit={handlePasswordSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="currentPassword">当前密码</Label>
               <Input
+                required
+                autoComplete="current-password"
                 id="currentPassword"
                 name="currentPassword"
+                placeholder="输入当前密码"
                 type="password"
                 value={passwordForm.currentPassword}
                 onChange={handlePasswordChange}
-                placeholder="输入当前密码"
-                required
-                autoComplete="current-password"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="newPassword">新密码</Label>
               <Input
+                required
+                autoComplete="new-password"
                 id="newPassword"
+                minLength={8}
                 name="newPassword"
+                placeholder="输入新密码（至少 8 位）"
                 type="password"
                 value={passwordForm.newPassword}
                 onChange={handlePasswordChange}
-                placeholder="输入新密码（至少 8 位）"
-                required
-                autoComplete="new-password"
-                minLength={8}
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">确认新密码</Label>
               <Input
+                required
+                autoComplete="new-password"
                 id="confirmPassword"
+                minLength={8}
                 name="confirmPassword"
+                placeholder="再次输入新密码"
                 type="password"
                 value={passwordForm.confirmPassword}
                 onChange={handlePasswordChange}
-                placeholder="再次输入新密码"
-                required
-                autoComplete="new-password"
-                minLength={8}
               />
             </div>
 
@@ -189,7 +194,7 @@ export default function AccountPage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isChangingPassword}>
+            <Button disabled={isChangingPassword} type="submit">
               {isChangingPassword && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
@@ -237,9 +242,7 @@ export default function AccountPage() {
             <AlertTriangle className="h-5 w-5 text-destructive" />
             <CardTitle className="text-destructive">危险操作</CardTitle>
           </div>
-          <CardDescription>
-            以下操作不可撤销，请谨慎操作
-          </CardDescription>
+          <CardDescription>以下操作不可撤销，请谨慎操作</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -274,8 +277,8 @@ export default function AccountPage() {
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDeleteAccount}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDeleteAccount}
             >
               确认删除
             </AlertDialogAction>

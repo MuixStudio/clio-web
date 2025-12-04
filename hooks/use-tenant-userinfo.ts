@@ -1,9 +1,10 @@
 "use client";
 
+import type { SidebarUser } from "@/components/sidebar/sidebar";
+
 import { useMemo } from "react";
 import useSWR from "swr";
 
-import type { SidebarUser } from "@/components/sidebar/sidebar";
 import { useTenantContext } from "@/contexts/tenant-context";
 
 /**
@@ -19,9 +20,7 @@ export interface UserinfoResponse {
  * 从API获取用户信息的fetcher函数
  * @param tenantId 租户ID
  */
-const fetchUserinfo = async (
-  tenantId: string,
-): Promise<UserinfoResponse> => {
+const fetchUserinfo = async (tenantId: string): Promise<UserinfoResponse> => {
   // TODO: 替换为实际的API调用
   // const response = await get<UserinfoResponse>(`/api/v1/userinfo?tenantId=${tenantId}`);
   // return response;
@@ -48,11 +47,13 @@ const fetchUserinfo = async (
     },
   };
 
-  return userMap[tenantId] || {
-    name: "Guest User",
-    email: "guest@example.com",
-    avatar: "/avatars/default.jpg",
-  };
+  return (
+    userMap[tenantId] || {
+      name: "Guest User",
+      email: "guest@example.com",
+      avatar: "/avatars/default.jpg",
+    }
+  );
 };
 
 /**

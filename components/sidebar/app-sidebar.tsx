@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { usePathname } from "next/navigation";
 import useSWR from "swr";
 
 import { NavMain } from "@/components/sidebar/nav-main";
@@ -15,7 +14,6 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useNavItems } from "@/hooks/use-nav-items";
 import { useTenant } from "@/hooks/use-tenant";
 import { getUserInfo } from "@/service/user";
 import { Tenant } from "@/components/sidebar/sidebar";
@@ -23,7 +21,7 @@ import { Tenant } from "@/components/sidebar/sidebar";
 export const AppSidebar: React.FC = ({
   ...props
 }: React.ComponentProps<typeof AppSidebar>) => {
-  const pathname = usePathname();
+  // const pathname = usePathname();
 
   // 获取用户信息
   const { data: userInfo, isLoading: userLoading } = useSWR(
@@ -31,22 +29,22 @@ export const AppSidebar: React.FC = ({
     getUserInfo,
   );
 
-  // 根据用户角色获取导航菜单
-  const menu = useNavItems(userInfo?.role);
-
-  // 根据当前路径设置菜单激活状态
-  const menuWithActiveState = React.useMemo(() => {
-    return {
-      ...menu,
-      navGroups: menu.navGroups.map((group) => ({
-        ...group,
-        items: group.items.map((item) => ({
-          ...item,
-          isActive: pathname.startsWith(item.url),
-        })),
-      })),
-    };
-  }, [menu, pathname]);
+  // // 根据用户角色获取导航菜单
+  // const menu = useNavItems(userInfo?.role);
+  //
+  // // 根据当前路径设置菜单激活状态
+  // const menuWithActiveState = React.useMemo(() => {
+  //   return {
+  //     ...menu,
+  //     navGroups: menu.navGroups.map((group) => ({
+  //       ...group,
+  //       items: group.items.map((item) => ({
+  //         ...item,
+  //         isActive: pathname.startsWith(item.url),
+  //       })),
+  //     })),
+  //   };
+  // }, [menu, pathname]);
 
   // 获取团队列表
   const { tenants, isLoading: teamsLoading } = useTenant();
@@ -83,7 +81,7 @@ export const AppSidebar: React.FC = ({
         <TenantSwitcher tenants={tenants} onChange={tenantChanged} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain menu={menuWithActiveState} />
+        <NavMain />
       </SidebarContent>
       <SidebarFooter>
         <NavUser

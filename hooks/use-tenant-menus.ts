@@ -1,5 +1,8 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
+import type { NavItem, Project } from "@/components/sidebar/sidebar";
+
 import { useMemo } from "react";
 import useSWR from "swr";
 import {
@@ -11,9 +14,7 @@ import {
   Settings2,
   SquareTerminal,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 
-import type { NavItem, Project } from "@/components/sidebar/sidebar";
 import { useTenantContext } from "@/contexts/tenant-context";
 
 /**

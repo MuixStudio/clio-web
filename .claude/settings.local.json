@@ -24,7 +24,9 @@
       "Bash(pnpm add:*)",
       "Bash(pnpm outdated:*)",
       "Bash(pnpm view:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(cat:*)",
+      "mcp__next-devtools__browser_eval"
     ],
     "deny": [],
     "ask": []

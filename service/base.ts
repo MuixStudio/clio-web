@@ -6,7 +6,7 @@ import type { ResponseError } from "./fetch";
 
 import { toast } from "sonner";
 
-import { base, getAccessToken, getRefreshToken } from "./fetch";
+import { base } from "./fetch";
 
 import { asyncRunSafe } from "@/utils";
 import { basePath } from "@/utils/var";
@@ -144,6 +144,7 @@ async function handleTokenRefresh(timeout: number = 100000): Promise<boolean> {
       // 尝试解析错误响应
       try {
         const errorData = await response.json();
+
         console.error("[Token Refresh] 错误详情:", errorData);
       } catch (e) {
         console.error("[Token Refresh] 无法解析错误响应");

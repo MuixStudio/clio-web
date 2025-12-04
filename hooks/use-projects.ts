@@ -1,9 +1,9 @@
 "use client";
 
+import type { Project } from "@/components/sidebar/sidebar";
+
 import useSWR from "swr";
 import { Frame, PieChart, Map } from "lucide-react";
-
-import type { Project } from "@/components/sidebar/sidebar";
 
 /**
  * 项目API响应类型

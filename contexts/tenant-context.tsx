@@ -36,6 +36,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedTenantId = localStorage.getItem(TENANT_STORAGE_KEY);
+
       if (savedTenantId) {
         setCurrentTenantIdState(savedTenantId);
       }
@@ -69,8 +70,10 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
  */
 export function useTenantContext() {
   const context = useContext(TenantContext);
+
   if (context === undefined) {
     throw new Error("useTenantContext must be used within a TenantProvider");
   }
+
   return context;
 }

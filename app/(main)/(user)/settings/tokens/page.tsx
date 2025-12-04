@@ -27,7 +27,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -44,11 +50,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { get, post } from "@/service/base";
 
 interface Token {
   id: string;
@@ -101,14 +112,16 @@ const expirationOptions = [
 ];
 
 export default function TokensPage() {
-  const { data: tokens, isLoading, mutate } = useSWR<Token[]>(
-    "/user/tokens",
-    async () => {
-      // TODO: 实现实际的 API 调用
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return mockTokens;
-    },
-  );
+  const {
+    data: tokens,
+    isLoading,
+    mutate,
+  } = useSWR<Token[]>("/user/tokens", async () => {
+    // TODO: 实现实际的 API 调用
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    return mockTokens;
+  });
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showTokenDialog, setShowTokenDialog] = useState(false);
@@ -222,9 +235,7 @@ export default function TokensPage() {
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-lg font-medium">API 令牌</h3>
-          <p className="text-sm text-muted-foreground">
-            管理您的 API 访问令牌
-          </p>
+          <p className="text-sm text-muted-foreground">管理您的 API 访问令牌</p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -239,9 +250,9 @@ export default function TokensPage() {
           {tokens.map((token) => (
             <TokenCard
               key={token.id}
+              isRevoking={revoking === token.id}
               token={token}
               onRevoke={() => setShowRevokeDialog(token.id)}
-              isRevoking={revoking === token.id}
             />
           ))}
         </div>
@@ -253,10 +264,7 @@ export default function TokensPage() {
             <p className="mt-2 text-sm text-muted-foreground">
               创建一个令牌来访问 API
             </p>
-            <Button
-              className="mt-4"
-              onClick={() => setShowCreateDialog(true)}
-            >
+            <Button className="mt-4" onClick={() => setShowCreateDialog(true)}>
               <Plus className="mr-2 h-4 w-4" />
               创建令牌
             </Button>
@@ -278,13 +286,13 @@ export default function TokensPage() {
               <div className="space-y-2">
                 <Label htmlFor="token-name">令牌名称</Label>
                 <Input
+                  required
                   id="token-name"
+                  placeholder="例如: Development API"
                   value={createForm.name}
                   onChange={(e) =>
                     setCreateForm((prev) => ({ ...prev, name: e.target.value }))
                   }
-                  placeholder="例如: Development API"
-                  required
                 />
                 <p className="text-xs text-muted-foreground">
                   用于识别此令牌的用途
@@ -335,14 +343,14 @@ export default function TokensPage() {
             </div>
             <DialogFooter>
               <Button
+                disabled={isCreating}
                 type="button"
                 variant="outline"
                 onClick={() => setShowCreateDialog(false)}
-                disabled={isCreating}
               >
                 取消
               </Button>
-              <Button type="submit" disabled={isCreating}>
+              <Button disabled={isCreating} type="submit">
                 {isCreating && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
@@ -367,15 +375,15 @@ export default function TokensPage() {
               <Label>令牌</Label>
               <div className="flex items-center gap-2">
                 <Input
-                  value={newToken?.token || ""}
                   readOnly
-                  type={showToken ? "text" : "password"}
                   className="font-mono text-sm"
+                  type={showToken ? "text" : "password"}
+                  value={newToken?.token || ""}
                 />
                 <Button
+                  size="icon"
                   type="button"
                   variant="outline"
-                  size="icon"
                   onClick={() => setShowToken(!showToken)}
                 >
                   {showToken ? (
@@ -385,9 +393,9 @@ export default function TokensPage() {
                   )}
                 </Button>
                 <Button
+                  size="icon"
                   type="button"
                   variant="outline"
-                  size="icon"
                   onClick={handleCopyToken}
                 >
                   {tokenCopied ? (
@@ -432,11 +440,11 @@ export default function TokensPage() {
               取消
             </AlertDialogCancel>
             <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={revoking !== null}
               onClick={() =>
                 showRevokeDialog && handleRevokeToken(showRevokeDialog)
               }
-              disabled={revoking !== null}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {revoking && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               确认撤销
@@ -476,15 +484,15 @@ function TokenCard({ token, onRevoke, isRevoking }: TokenCardProps) {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button size="icon" variant="ghost">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onClick={onRevoke}
                 className="text-destructive"
                 disabled={isRevoking}
+                onClick={onRevoke}
               >
                 {isRevoking ? "撤销中..." : "撤销令牌"}
               </DropdownMenuItem>
@@ -523,11 +531,7 @@ function TokenCard({ token, onRevoke, isRevoking }: TokenCardProps) {
           {token.expiresAt && (
             <div className="flex items-center justify-between">
               <span>过期时间:</span>
-              <span
-                className={cn(
-                  isExpired && "font-medium text-destructive",
-                )}
-              >
+              <span className={cn(isExpired && "font-medium text-destructive")}>
                 {isExpired
                   ? "已过期"
                   : formatDistanceToNow(token.expiresAt, {

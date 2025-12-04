@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import useSWR from "swr";
-import { Chrome, Smartphone, Monitor, MapPin, Clock, Loader2 } from "lucide-react";
+import {
+  Chrome,
+  Smartphone,
+  Monitor,
+  MapPin,
+  Clock,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
@@ -18,11 +25,16 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { get, post } from "@/service/base";
 
 interface Session {
   id: string;
@@ -71,12 +83,14 @@ const mockSessions: Session[] = [
 
 const getDeviceIcon = (device: string) => {
   const deviceLower = device.toLowerCase();
+
   if (deviceLower.includes("mobile") || deviceLower.includes("phone")) {
     return Smartphone;
   }
   if (deviceLower.includes("tablet")) {
     return Monitor;
   }
+
   return Monitor;
 };
 
@@ -87,15 +101,17 @@ const getBrowserIcon = (browser: string) => {
 
 export default function SessionsPage() {
   // 实际应用中应该从 API 获取
-  const { data: sessions, isLoading, mutate } = useSWR<Session[]>(
-    "/user/sessions",
-    async () => {
-      // TODO: 实现实际的 API 调用
-      // return await get("/user/sessions");
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return mockSessions;
-    },
-  );
+  const {
+    data: sessions,
+    isLoading,
+    mutate,
+  } = useSWR<Session[]>("/user/sessions", async () => {
+    // TODO: 实现实际的 API 调用
+    // return await get("/user/sessions");
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    return mockSessions;
+  });
 
   const [revoking, setRevoking] = useState<string | null>(null);
   const [showRevokeAllDialog, setShowRevokeAllDialog] = useState(false);
@@ -198,9 +214,9 @@ export default function SessionsPage() {
             {otherSessions.map((session) => (
               <SessionCard
                 key={session.id}
+                isRevoking={revoking === session.id}
                 session={session}
                 onRevoke={handleRevokeSession}
-                isRevoking={revoking === session.id}
               />
             ))}
           </div>
@@ -231,12 +247,10 @@ export default function SessionsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isRevokingAll}>
-              取消
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={isRevokingAll}>取消</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleRevokeAllSessions}
               disabled={isRevokingAll}
+              onClick={handleRevokeAllSessions}
             >
               {isRevokingAll && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -287,10 +301,10 @@ function SessionCard({ session, onRevoke, isRevoking }: SessionCardProps) {
           </div>
           {!session.current && onRevoke && (
             <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onRevoke(session.id)}
               disabled={isRevoking}
+              size="sm"
+              variant="ghost"
+              onClick={() => onRevoke(session.id)}
             >
               {isRevoking ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

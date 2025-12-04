@@ -1,9 +1,13 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
+import { AnimatePresence, domAnimation, LazyMotion, m } from "framer-motion";
+import { Icon } from "@iconify/react";
+import { Eye, EyeOff } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -11,9 +15,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { AnimatePresence, domAnimation, LazyMotion, m } from "framer-motion";
-import { Icon } from "@iconify/react";
-import { Eye, EyeOff } from "lucide-react";
 
 export default function Component() {
   const [isVisible, setIsVisible] = React.useState(false);
@@ -81,10 +82,10 @@ export default function Component() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
+                        className="h-8 w-8 p-0"
                         size="sm"
                         variant="ghost"
                         onClick={() => paginate(-1)}
-                        className="h-8 w-8 p-0"
                       >
                         <Icon
                           className="text-muted-foreground"
@@ -124,10 +125,11 @@ export default function Component() {
             >
               {page === 0 ? (
                 <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium">
+                  <label className="text-sm font-medium" htmlFor="email">
                     Email Address
                   </label>
                   <Input
+                    className={!isEmailValid ? "border-destructive" : ""}
                     id="email"
                     name="email"
                     placeholder="Enter your email"
@@ -137,7 +139,6 @@ export default function Component() {
                       setIsEmailValid(true);
                       setEmail(e.target.value);
                     }}
-                    className={!isEmailValid ? "border-destructive" : ""}
                   />
                   {!isEmailValid && (
                     <p className="text-sm text-destructive">
@@ -147,11 +148,12 @@ export default function Component() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <label htmlFor="password" className="text-sm font-medium">
+                  <label className="text-sm font-medium" htmlFor="password">
                     Password
                   </label>
                   <div className="relative">
                     <Input
+                      className={!isPasswordValid ? "border-destructive" : ""}
                       id="password"
                       name="password"
                       placeholder="Enter your password"
@@ -161,12 +163,11 @@ export default function Component() {
                         setIsPasswordValid(true);
                         setPassword(e.target.value);
                       }}
-                      className={!isPasswordValid ? "border-destructive" : ""}
                     />
                     <button
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       type="button"
                       onClick={toggleVisibility}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
                       {isVisible ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
@@ -186,7 +187,7 @@ export default function Component() {
           </AnimatePresence>
         </LazyMotion>
         <p className="text-sm text-center">
-          <Link href="#" className="text-sm text-primary hover:underline">
+          <Link className="text-sm text-primary hover:underline" href="#">
             Forgot password?
           </Link>
         </p>
@@ -196,13 +197,13 @@ export default function Component() {
           <Separator className="flex-1" />
         </div>
         <div className="flex flex-col gap-2">
-          <Button variant="outline" className="w-full">
+          <Button className="w-full" variant="outline">
             <Icon icon="flat-color-icons:google" width={24} />
             Continue with Google
           </Button>
           <Button
-            variant="outline"
             className="w-full"
+            variant="outline"
             onClick={() => {
               window.location.href = "http://localhost:8080/auth/github/login";
             }}
@@ -217,7 +218,7 @@ export default function Component() {
         </div>
         <p className="text-sm text-center">
           Need to create an account?&nbsp;
-          <Link href="#" className="text-sm text-primary hover:underline">
+          <Link className="text-sm text-primary hover:underline" href="#">
             Sign Up
           </Link>
         </p>

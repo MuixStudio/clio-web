@@ -1,8 +1,9 @@
 "use client";
 
+import type { SidebarData } from "@/components/sidebar/sidebar";
+
 import { useMemo } from "react";
 
-import type { SidebarData } from "@/components/sidebar/sidebar";
 import { useTenants } from "./use-tenants";
 import { useTenantUserinfo } from "./use-tenant-userinfo";
 import { useTenantMenus } from "./use-tenant-menus";
@@ -75,6 +76,7 @@ export function useSidebarData(): SidebarDataState {
         userinfoError,
         menusError,
       });
+
       return null;
     }
 

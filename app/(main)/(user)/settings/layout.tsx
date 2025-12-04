@@ -14,9 +14,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
           <Settings className="h-6 w-6" />
           <h2 className="text-2xl font-bold tracking-tight">设置</h2>
         </div>
-        <p className="text-muted-foreground">
-          管理您的账户设置和偏好配置
-        </p>
+        <p className="text-muted-foreground">管理您的账户设置和偏好配置</p>
       </div>
       <Separator />
       <div className="max-w-4xl">{children}</div>

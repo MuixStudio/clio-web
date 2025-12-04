@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { BookOpen, Bot, Settings2, SquareTerminal } from "lucide-react";
+import { BookOpen, Bot, SquareTerminal } from "lucide-react";
 
 import { Menu } from "@/components/sidebar/sidebar";
 

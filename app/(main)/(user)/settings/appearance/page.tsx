@@ -4,10 +4,21 @@ import { useTheme } from "next-themes";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
@@ -56,6 +67,7 @@ export default function AppearancePage() {
     // 从 localStorage 读取偏好设置
     const savedFontSize = localStorage.getItem("fontSize") || "medium";
     const savedLanguage = localStorage.getItem("language") || "zh-CN";
+
     setFontSize(savedFontSize);
     setLanguage(savedLanguage);
   }, []);
@@ -91,9 +103,7 @@ export default function AppearancePage() {
       <Card>
         <CardHeader>
           <CardTitle>主题</CardTitle>
-          <CardDescription>
-            选择应用的外观主题
-          </CardDescription>
+          <CardDescription>选择应用的外观主题</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -104,23 +114,25 @@ export default function AppearancePage() {
               return (
                 <button
                   key={item.value}
-                  onClick={() => setTheme(item.value)}
                   className={cn(
                     "relative flex flex-col items-center gap-3 rounded-lg border-2 p-4 transition-colors hover:bg-accent",
-                    isActive
-                      ? "border-primary bg-accent"
-                      : "border-border",
+                    isActive ? "border-primary bg-accent" : "border-border",
                   )}
+                  onClick={() => setTheme(item.value)}
                 >
-                  <Icon className={cn(
-                    "h-8 w-8",
-                    isActive ? "text-primary" : "text-muted-foreground",
-                  )} />
+                  <Icon
+                    className={cn(
+                      "h-8 w-8",
+                      isActive ? "text-primary" : "text-muted-foreground",
+                    )}
+                  />
                   <div className="space-y-1 text-center">
-                    <p className={cn(
-                      "text-sm font-medium",
-                      isActive ? "text-foreground" : "text-muted-foreground",
-                    )}>
+                    <p
+                      className={cn(
+                        "text-sm font-medium",
+                        isActive ? "text-foreground" : "text-muted-foreground",
+                      )}
+                    >
                       {item.label}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -141,9 +153,7 @@ export default function AppearancePage() {
       <Card>
         <CardHeader>
           <CardTitle>字体大小</CardTitle>
-          <CardDescription>
-            调整界面文字的显示大小
-          </CardDescription>
+          <CardDescription>调整界面文字的显示大小</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
@@ -153,25 +163,27 @@ export default function AppearancePage() {
               return (
                 <button
                   key={item.value}
-                  onClick={() => handleFontSizeChange(item.value)}
                   className={cn(
                     "relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-4 transition-colors hover:bg-accent",
-                    isActive
-                      ? "border-primary bg-accent"
-                      : "border-border",
+                    isActive ? "border-primary bg-accent" : "border-border",
                   )}
+                  onClick={() => handleFontSizeChange(item.value)}
                 >
-                  <span className={cn(
-                    "font-medium",
-                    item.className,
-                    isActive ? "text-foreground" : "text-muted-foreground",
-                  )}>
+                  <span
+                    className={cn(
+                      "font-medium",
+                      item.className,
+                      isActive ? "text-foreground" : "text-muted-foreground",
+                    )}
+                  >
                     Aa
                   </span>
-                  <span className={cn(
-                    "text-xs",
-                    isActive ? "text-foreground" : "text-muted-foreground",
-                  )}>
+                  <span
+                    className={cn(
+                      "text-xs",
+                      isActive ? "text-foreground" : "text-muted-foreground",
+                    )}
+                  >
                     {item.label}
                   </span>
                   {isActive && (
@@ -188,17 +200,15 @@ export default function AppearancePage() {
       <Card>
         <CardHeader>
           <CardTitle>语言</CardTitle>
-          <CardDescription>
-            选择应用的显示语言
-          </CardDescription>
+          <CardDescription>选择应用的显示语言</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
-            <Label htmlFor="language" className="w-24">
+            <Label className="w-24" htmlFor="language">
               界面语言
             </Label>
             <Select value={language} onValueChange={handleLanguageChange}>
-              <SelectTrigger id="language" className="w-[200px]">
+              <SelectTrigger className="w-[200px]" id="language">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

@@ -1,10 +1,11 @@
 "use client";
 
+import type { Tenant } from "@/components/sidebar/sidebar";
+
 import { useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
 
-import type { Tenant } from "@/components/sidebar/sidebar";
 import { useTenantContext } from "@/contexts/tenant-context";
 
 /**
@@ -27,6 +28,7 @@ const fetchTenants = async (): Promise<TenantResponse[]> => {
 
   // 模拟API响应（模拟网络延迟）
   await new Promise((resolve) => setTimeout(resolve, 800));
+
   return [
     { id: "tenant-1", name: "Acme Inc", plan: "Enterprise", logo: "gallery" },
     { id: "tenant-2", name: "Acme Corp.", plan: "Startup", logo: "audio" },
