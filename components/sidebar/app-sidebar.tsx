@@ -17,40 +17,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTenant } from "@/hooks/use-tenant";
 import { getUserInfo } from "@/service/user";
 import { Tenant } from "@/components/sidebar/sidebar";
+import {NavAdmin} from "@/components/sidebar/nav-admin";
 
 export const AppSidebar: React.FC = ({
   ...props
 }: React.ComponentProps<typeof AppSidebar>) => {
-  // const pathname = usePathname();
-
   // 获取用户信息
   const { data: userInfo, isLoading: userLoading } = useSWR(
     "/userinfo",
     getUserInfo,
   );
 
-  // // 根据用户角色获取导航菜单
-  // const menu = useNavItems(userInfo?.role);
-  //
-  // // 根据当前路径设置菜单激活状态
-  // const menuWithActiveState = React.useMemo(() => {
-  //   return {
-  //     ...menu,
-  //     navGroups: menu.navGroups.map((group) => ({
-  //       ...group,
-  //       items: group.items.map((item) => ({
-  //         ...item,
-  //         isActive: pathname.startsWith(item.url),
-  //       })),
-  //     })),
-  //   };
-  // }, [menu, pathname]);
-
   // 获取团队列表
   const { tenants, isLoading: teamsLoading } = useTenant();
 
   // 任何数据还在加载中，显示骨架屏
-  if (teamsLoading) {
+  if (userLoading || teamsLoading) {
     return (
       <Sidebar collapsible="icon" {...props}>
         <SidebarHeader>
@@ -84,11 +66,14 @@ export const AppSidebar: React.FC = ({
         <NavMain />
       </SidebarContent>
       <SidebarFooter>
+        <NavAdmin/>
+      </SidebarFooter>
+      <SidebarFooter className="border-t border-border dark:border-border-dark">
         <NavUser
           user={{
-            name: userInfo?.name || "Guest",
-            email: userInfo?.email || "",
-            avatar: userInfo?.avatar || "/avatars/default.jpg",
+            name: userInfo?.name || undefined,
+            email: userInfo?.email || undefined,
+            avatar: userInfo?.avatar_url || undefined,
           }}
         />
       </SidebarFooter>

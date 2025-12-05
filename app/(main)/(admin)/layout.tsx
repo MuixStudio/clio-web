@@ -13,11 +13,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {
         navGroups: [
           {
-            name: "App",
+            name: "Admin",
             items: [
               {
-                title: "home",
-                url: "/",
+                title: "admin",
+                url: "/admin",
+                icon: House,
+              },
+              {
+                title: "workflows",
+                url: "/workflows",
+                icon: Workflow,
+              },
+            ],
+          },
+          {
+            name: "Admin",
+            items: [
+              {
+                title: "admin",
+                url: "/admin",
                 icon: House,
               },
               {

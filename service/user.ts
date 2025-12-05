@@ -15,7 +15,7 @@ export interface UserInfo {
   /** 用户邮箱 */
   email: string;
   /** 用户头像 URL（可选） */
-  avatar?: string;
+  avatar_url?: string;
   /** 其他扩展字段 */
   [key: string]: any;
 }
@@ -25,6 +25,12 @@ export interface UserInfo {
  * 从后端接口获取当前登录用户的详细信息
  * @returns Promise<UserInfo> 用户信息对象
  */
-export const getUserInfo = () => {
-  return get<UserInfo>("/api/v1/userinfo", {}, { isAuthURL: true });
+export const getUserInfo = async (): Promise<UserInfo> => {
+  const response = await get<{
+    code: number;
+    message: string;
+    data: { user: UserInfo };
+  }>("/api/v1/userinfo", {}, { isAuthURL: true });
+
+  return response.data.user;
 };

@@ -7,6 +7,7 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react";
+import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -29,9 +30,9 @@ export function NavUser({
   user,
 }: {
   user: {
-    name: string;
-    email: string;
-    avatar: string;
+    name: string | undefined;
+    email: string | undefined;
+    avatar: string | undefined;
   };
 }) {
   const { isMobile } = useSidebar();
@@ -91,7 +92,9 @@ export function NavUser({
               {/*Settings*/}
               <DropdownMenuItem>
                 <UserRoundCog />
-                Settings
+                <Link href="/settings">
+                  <span>Settings</span>
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
