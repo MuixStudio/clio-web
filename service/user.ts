@@ -7,9 +7,9 @@ import { get } from "./base";
 /**
  * 用户信息数据结构
  */
-export interface UserInfo {
+export interface UserInfoRsp {
   /** 用户 ID */
-  id: string;
+  user_id: string;
   /** 用户名称 */
   name: string;
   /** 用户邮箱 */
@@ -25,11 +25,11 @@ export interface UserInfo {
  * 从后端接口获取当前登录用户的详细信息
  * @returns Promise<UserInfo> 用户信息对象
  */
-export const getUserInfo = async (): Promise<UserInfo> => {
+export const getUserInfo = async (): Promise<UserInfoRsp> => {
   const response = await get<{
     code: number;
     message: string;
-    data: { user: UserInfo };
+    data: { user: UserInfoRsp };
   }>("/api/v1/userinfo", {}, { isAuthURL: true });
 
   return response.data.user;

@@ -53,31 +53,3 @@ export interface SidebarUser {
   /** 用户头像URL */
   avatar: string;
 }
-
-/**
- * 租户信息类型
- */
-export interface Tenant {
-  /** 租户ID */
-  tenant_id: string;
-  /** 租户名称 */
-  name: string;
-  /** 租户Logo（Lucide图标组件） */
-  logo: LucideIcon;
-  /** 租户计划类型 */
-  plan: string;
-}
-
-/**
- * 侧边栏完整数据类型
- */
-export interface SidebarData {
-  /** 用户信息 */
-  user: SidebarUser;
-  /** 团队列表 */
-  tenants: Tenant[];
-  /** 主导航菜单 */
-  navMain: NavItem[];
-  /** 项目列表 */
-  projects: Project[];
-}

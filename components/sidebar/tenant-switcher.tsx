@@ -1,9 +1,7 @@
 "use client";
 
-import type { Tenant } from "@/components/sidebar/sidebar";
-
 import * as React from "react";
-import { ChevronsUpDown, Plus } from "lucide-react";
+import { ChevronsUpDown, LucideIcon, Plus } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -21,82 +19,53 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTenantContext } from "@/contexts/tenant-context";
+
+/**
+ * 租户信息类型
+ */
+export interface Tenant {
+  /** 租户ID */
+  tenant_id: string;
+  /** 租户名称 */
+  name: string;
+  /** 租户Logo（Lucide图标组件） */
+  logo_url: LucideIcon;
+  /** 租户计划类型 */
+  plan_type: string;
+}
 
 type Props = {
+  /** 租户列表 */
   tenants: Tenant[];
-  /** 受控模式：当前选中的租户ID */
-  value?: string;
-  /** 非受控模式：默认选中的租户ID */
-  defaultValue?: string;
-  /** 值改变时的回调函数，返回完整的租户对象 */
-  onChange?: (tenant: Tenant) => void;
+  /** 当前选中的租户ID */
+  currentTenantId: string;
+  /** 租户切换时的回调函数，返回完整的租户对象 */
+  onChange: (tenant: Tenant) => void;
   /** 是否处于加载状态 */
   isLoading?: boolean;
 };
 
 export const TenantSwitcher: React.FC<Props> = ({
   tenants,
-  value,
-  defaultValue,
+  currentTenantId,
   onChange,
   isLoading = false,
-}: {
-  tenants: Tenant[];
-  value?: string;
-  defaultValue?: string;
-  onChange?: (tenant: Tenant) => void;
-  isLoading?: boolean;
-}) => {
+}: Props) => {
   const { isMobile } = useSidebar();
-  const { currentTenantId, setCurrentTenantId } = useTenantContext();
 
-  // 内部状态用于非受控模式
-  const [internalValue, setInternalValue] = React.useState<string | undefined>(
-    defaultValue,
-  );
-
-  // 判断是否为受控组件
-  const isControlled = value !== undefined;
-
-  // 获取当前值：受控模式使用 value，非受控模式使用内部状态，否则使用 context
-  const currentValue = React.useMemo(() => {
-    if (isControlled) {
-      return value;
-    }
-    if (internalValue !== undefined) {
-      return internalValue;
-    }
-
-    return currentTenantId;
-  }, [isControlled, value, internalValue, currentTenantId]);
-
-  // 根据当前租户ID找到激活的团队
-  const activeTeam = React.useMemo(
+  // 根据当前租户ID找到激活的租户
+  const activeTenant = React.useMemo(
     () =>
-      tenants.find((tenant) => tenant.tenant_id === currentValue) || tenants[0],
-    [tenants, currentValue],
+      tenants.find((tenant) => tenant.tenant_id === currentTenantId) ||
+      tenants[0],
+    [tenants, currentTenantId],
   );
-
-  // 处理团队切换
-  const handleTeamChange = React.useCallback(
+  // 处理租户切换
+  const handleTenantChange = React.useCallback(
     (tenant: Tenant) => {
-      const newValue = tenant.tenant_id;
-
-      // 如果是非受控模式，更新内部状态
-      if (!isControlled) {
-        setInternalValue(newValue);
-      }
-
-      // 调用外部 onChange 回调，传递完整的租户对象
-      onChange?.(tenant);
-
-      // 如果没有传入 value/defaultValue/onChange，使用 context（保持向后兼容）
-      if (value === undefined && defaultValue === undefined && !onChange) {
-        setCurrentTenantId(newValue);
-      }
+      onChange(tenant);
     },
-    [isControlled, onChange, value, defaultValue, setCurrentTenantId],
+    [onChange],
   );
 
   // 加载状态时显示骨架屏
@@ -116,7 +85,7 @@ export const TenantSwitcher: React.FC<Props> = ({
     );
   }
 
-  if (!activeTeam) {
+  if (!activeTenant) {
     return null;
   }
 
@@ -130,13 +99,15 @@ export const TenantSwitcher: React.FC<Props> = ({
               size="lg"
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <activeTeam.logo className="size-4" />
+                <activeTenant.logo_url className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {activeTeam.name}
+                  {activeTenant.name}
                 </span>
-                <span className="truncate text-xs">{activeTeam.plan}</span>
+                <span className="truncate text-xs">
+                  {activeTenant.plan_type}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -148,16 +119,16 @@ export const TenantSwitcher: React.FC<Props> = ({
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Teams
+              Tenants
             </DropdownMenuLabel>
             {tenants.map((tenant, index) => (
               <DropdownMenuItem
                 key={tenant.tenant_id}
                 className="gap-2 p-2"
-                onClick={() => handleTeamChange(tenant)}
+                onClick={() => handleTenantChange(tenant)}
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border">
-                  <tenant.logo className="size-4 shrink-0" />
+                  <tenant.logo_url className="size-4 shrink-0" />
                 </div>
                 {tenant.name}
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
@@ -168,7 +139,9 @@ export const TenantSwitcher: React.FC<Props> = ({
               <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                 <Plus className="size-4" />
               </div>
-              <div className="font-medium text-muted-foreground">Add team</div>
+              <div className="font-medium text-muted-foreground">
+                Add tenant
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
