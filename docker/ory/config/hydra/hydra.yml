@@ -1,0 +1,33 @@
+dsn: postgres://neondb_owner:aa@ep-tiny-violet-ahqap9ed-pooler.us-east-1.aws.neon.tech:5432/clio?sslmode=require&channel_binding=require
+
+serve:
+  public:
+    port: 4444
+    cors:
+      enabled: true
+  admin:
+    port: 4445
+
+urls:
+  self:
+    issuer: http://locahost:8080
+  login: http://locahost:8080/auth/login
+  consent: http://locahost:8080/auth/consent
+  logout: http://locahost:8080/auth/logout
+
+secrets:
+  system:
+  - "change-this-to-a-random-secret-min-16-chars"
+
+ttl:
+  access_token: 1h
+  refresh_token: 720h
+
+oauth2:
+  pkce:
+    enforced_for_public_clients: true
+  expose_internal_errors: false
+
+oidc:
+  subject_identifiers:
+    supported_types: [ "public" ]

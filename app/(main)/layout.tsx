@@ -1,3 +1,5 @@
+import { SessionProvider } from "@ory/elements-react/client";
+
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -13,24 +15,30 @@ export default function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const baseUrl = `${process.env.NEXT_PUBLIC_ORY_SDK_URL}`;
+
   return (
-    <AppContextProvider>
-      <SidebarProvider className="h-full">
-        <MenuProvider>
-          <AppSidebar />
-          <SidebarInset className="h-full">
-            <header className="sticky top-0 z-50 flex h-12 shrink-0 items-center border-b border-border gap-2 transition-width ease-linear bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-              <div className="flex items-center gap-2 px-4">
-                <SidebarTrigger className="-ml-1" />
-                <Separator className="mr-2 h-4" orientation="vertical" />
+    <SessionProvider baseUrl={baseUrl}>
+      <AppContextProvider>
+        <SidebarProvider className="h-full">
+          <MenuProvider>
+            <AppSidebar />
+            <SidebarInset className="h-full">
+              <header className="sticky top-0 z-50 flex h-12 shrink-0 items-center border-b border-border gap-2 transition-width ease-linear bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <div className="flex items-center gap-2 px-4">
+                  <SidebarTrigger className="-ml-1" />
+                  <Separator className="mr-2 h-4" orientation="vertical" />
+                </div>
+              </header>
+              <div className="flex-1 overflow-hidden h-full">
+                <div className="h-full overflow-y-auto p-4 pt-0">
+                  {children}
+                </div>
               </div>
-            </header>
-            <div className="flex-1 overflow-hidden h-full">
-              <div className="h-full overflow-y-auto p-4 pt-0">{children}</div>
-            </div>
-          </SidebarInset>
-        </MenuProvider>
-      </SidebarProvider>
-    </AppContextProvider>
+            </SidebarInset>
+          </MenuProvider>
+        </SidebarProvider>
+      </AppContextProvider>
+    </SessionProvider>
   );
 }

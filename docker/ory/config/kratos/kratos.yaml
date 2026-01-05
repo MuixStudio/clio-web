@@ -1,0 +1,228 @@
+version: v1.3.0
+
+dsn: postgresql://neondb_owner:npg_knRlYZKh5wq7@ep-tiny-violet-ahqap9ed-pooler.c-3.us-east-1.aws.neon.tech/clio?sslmode=require&channel_binding=require
+
+serve:
+  public:
+    base_url: https://clio-test.muixstudio.com/auth/
+    host: 0.0.0.0
+    port: 4433
+    cors:
+      enabled: true
+      allowed_origins:
+        - https://clio-test.muixstudio.com
+      allowed_methods:
+        - POST
+        - GET
+        - PUT
+        - PATCH
+        - DELETE
+      allowed_headers:
+        - Authorization
+        - Content-Type
+        - X-Session-Token
+      exposed_headers: []
+      allow_credentials: true
+      max_age: 3600
+  admin:
+    base_url: https://clio-test.muixstudio.com/auth/admin
+    host: 0.0.0.0
+    port: 4434
+
+selfservice:
+  default_browser_return_url: https://clio-test.muixstudio.com
+  allowed_return_urls:
+    - https://clio-test.muixstudio.com
+
+  methods:
+    password:
+      enabled: true
+      config:
+        haveibeenpwned_enabled: true
+        haveibeenpwned_host: api.pwnedpasswords.com
+        max_breaches: 0
+        ignore_network_errors: true
+        min_password_length: 8
+        identifier_similarity_check_enabled: true
+    oidc:
+      enabled: true
+      config:
+        providers:
+          - id: github
+            provider: github
+            client_id: Ov23li37yDsOoEpHqHhM
+            client_secret: 378900c86a87f64f422796f1ea12bd9ca199db30
+            mapper_url: file:///etc/config/kratos/datamap/oidc.github.jsonnet
+            scope:
+              - user:email
+    code:
+      enabled: true
+      passwordless_enabled: false
+      mfa_enabled: false
+
+  flows:
+    error:
+      ui_url: https://clio-test.muixstudio.com/error
+
+    settings:
+      ui_url: https://clio-test.muixstudio.com/settings
+      lifespan: 1h
+      privileged_session_max_age: 15m
+      required_aal: highest_available
+      after:
+        default_browser_return_url: https://clio-test.muixstudio.com/dashboard
+        password:
+          hooks:
+            - hook: revoke_active_sessions
+
+    recovery:
+      enabled: true
+      ui_url: https://clio-test.muixstudio.com/recovery
+      lifespan: 1h
+      use: code
+      notify_unknown_recipients: false
+      after:
+        default_browser_return_url: https://clio-test.muixstudio.com/dashboard
+
+    verification:
+      enabled: true
+      ui_url: https://clio-test.muixstudio.com/verification
+      lifespan: 1h
+      use: code
+      notify_unknown_recipients: false
+      after:
+        default_browser_return_url: https://clio-test.muixstudio.com/dashboard
+
+    logout:
+      after:
+        default_browser_return_url: https://clio-test.muixstudio.com/
+
+    login:
+      ui_url: https://clio-test.muixstudio.com/login
+      lifespan: 1h
+      style: unified
+      after:
+        default_browser_return_url: https://clio-test.muixstudio.com
+        password:
+          hooks:
+            - hook: require_verified_address
+        oidc:
+          hooks:
+            - hook: web_hook
+              config:
+                url: https://api.example.com/webhooks/login
+                method: POST
+                body: file:///etc/config/kratos/webhook-body.jsonnet
+                response:
+                  ignore: false
+                  parse: false
+
+    registration:
+      enabled: true
+      ui_url: https://clio-test.muixstudio.com/register
+      lifespan: 1h
+      style: profile_first
+      login_hints: false
+      after:
+        default_browser_return_url: https://clio-test.muixstudio.com
+        password:
+          hooks:
+            - hook: session
+            - hook: show_verification_ui
+        oidc:
+          hooks:
+            - hook: session
+            - hook: web_hook
+              config:
+                url: https://api.example.com/webhooks/registration
+                method: POST
+                response:
+                  ignore: false
+                  parse: true
+                auth:
+                  type: api_key
+                  config:
+                    name: X-API-Key
+                    value: your-api-key-here
+                    in: header
+
+log:
+  level: info
+  format: json
+  leak_sensitive_values: false
+
+secrets:
+  cookie:
+    - PLEASE-CHANGE-ME-I-AM-VERY-INSECURE
+  cipher:
+    - 32-LONG-SECRET-NOT-SECURE-AT-ALL
+
+cookies:
+  domain: clio-test.muixstudio.com
+  path: /
+  same_site: Lax
+
+session:
+  lifespan: 24h
+  earliest_possible_extend: 1h
+  cookie:
+    name: clio_session
+    persistent: true
+    same_site: Lax
+  whoami:
+    required_aal: highest_available
+
+identity:
+  default_schema_id: default
+  schemas:
+    - id: default
+      url: file:///etc/config/kratos/identities/default.json
+    - id: code
+      url: file:///etc/config/kratos/identities/default.json
+
+courier:
+  delivery_strategy: smtp
+  smtp:
+    connection_uri: smtps://kenley.wang@qq.com:xmedhesrjxpugedd@smtp.qq.com:465/
+    from_address: kenley.wang@qq.com
+    from_name: Example Corp
+  templates:
+    verification:
+      valid:
+        email:
+          body:
+            html: file:///etc/config/kratos/templates/verification/valid/email.body.html.gotmpl
+            plaintext: file:///etc/config/kratos/templates/verification/valid/email.body.plaintext.gotmpl
+          subject: file:///etc/config/kratos/templates/verification/valid/email.subject.gotmpl
+      invalid:
+        email:
+          body:
+            html: file:///etc/config/kratos/templates/verification/invalid/email.body.html.gotmpl
+            plaintext: file:///etc/config/kratos/templates/verification/invalid/email.body.plaintext.gotmpl
+          subject: file:///etc/config/kratos/templates/verification/invalid/email.subject.gotmpl
+    recovery:
+      valid:
+        email:
+          body:
+            html: file:///etc/config/kratos/templates/recovery/valid/email.body.html.gotmpl
+            plaintext: file:///etc/config/kratos/templates/recovery/valid/email.body.plaintext.gotmpl
+          subject: file:///etc/config/kratos/templates/recovery/valid/email.subject.gotmpl
+      invalid:
+        email:
+          body:
+            html: file:///etc/config/kratos/templates/recovery/invalid/email.body.html.gotmpl
+            plaintext: file:///etc/config/kratos/templates/recovery/invalid/email.body.plaintext.gotmpl
+          subject: file:///etc/config/kratos/templates/recovery/invalid/email.subject.gotmpl
+
+hashers:
+  algorithm: bcrypt
+  bcrypt:
+    cost: 12
+
+security:
+  account_enumeration:
+    mitigate: false
+
+feature_flags:
+  cacheable_sessions: false
+  use_continue_with_transitions: false

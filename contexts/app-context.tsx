@@ -11,8 +11,8 @@ import {
 } from "use-context-selector";
 import { noop } from "lodash-es";
 
-import { listTenants, TenantRsp, TenantsRsp } from "@/service/tenant";
-import { getUserInfo, UserInfoRsp } from "@/service/user";
+import { listTenants, TenantRsp, TenantsRsp } from "@/services/tenant";
+import { getUserInfo, UserInfoRsp } from "@/services/user";
 
 export type AppContextValue = {
   userInfo: UserInfoRsp;

@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getUserInfo } from "@/service/user";
+import { getUserInfo } from "@/services/user";
 
 interface ProfileFormData {
   name: string;

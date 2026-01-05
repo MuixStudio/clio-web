@@ -1,0 +1,36 @@
+# Please do not directly edit this file. Instead, modify the .env variables related to NGINX configuration.
+
+server {
+    listen ${NGINX_PORT};
+    server_name ${NGINX_SERVER_NAME};
+
+    location / {
+      proxy_pass http://10.223.96.52:3000;
+      include proxy.conf;
+    }
+
+    location /auth/ {
+      proxy_pass http://kratos:4433/;
+      include proxy.conf;
+    }
+
+    location /auth/admin {
+      proxy_pass http://kratos:4434/admin;
+      include proxy.conf;
+    }
+
+    location /_next/webpack-hmr {
+        proxy_pass http://10.223.96.52:3000/_next/webpack-hmr;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_read_timeout 86400;
+    }
+
+    # placeholder for acme challenge location
+    ${ACME_CHALLENGE_LOCATION}
+
+    # placeholder for https config defined in https.conf.template
+    ${HTTPS_CONFIG}
+}

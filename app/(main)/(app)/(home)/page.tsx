@@ -1,11 +1,12 @@
 import React from "react";
 
+// import { Editor } from "@/components/flow-editor";
+
 const Home: React.FC = () => {
   return (
     <>
-      <div className="h-100">Home1</div>
-      <div className="h-100">Home2</div>
-      <div className="h-100">Home3</div>
+      {/*<Editor />*/}
+        <div>home</div>
     </>
   );
 };

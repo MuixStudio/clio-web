@@ -26,11 +26,17 @@
       "Bash(pnpm view:*)",
       "Bash(node:*)",
       "Bash(cat:*)",
-      "mcp__next-devtools__browser_eval"
+      "mcp__next-devtools__browser_eval",
+      "Bash(pnpm list:*)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)",
+      "mcp__next-devtools__upgrade_nextjs_16"
     ],
     "deny": [],
     "ask": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "shadcn",
     "next-devtools"
