@@ -5,7 +5,7 @@ export const Navbar: React.FC = ({
 }: React.ComponentProps<typeof Navbar>) => {
   return (
     <>
-      <header className="w-full h-12 bg-green-50 border-b border-border">
+      <header className="w-full h-14 bg-navbar border-b border-border">
         <div className="">ddd</div>
       </header>
     </>

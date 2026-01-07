@@ -78,6 +78,22 @@
   --color-sidebar-border: var(--sidebar-border);
 
   --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-navbar: var(--navbar);
+
+  --color-navbar-foreground: var(--navbar-foreground);
+
+  --color-navbar-primary: var(--navbar-primary);
+
+  --color-navbar-primary-foreground: var(--navbar-primary-foreground);
+
+  --color-navbar-accent: var(--navbar-accent);
+
+  --color-navbar-accent-foreground: var(--navbar-accent-foreground);
+
+  --color-navbar-border: var(--navbar-border);
+
+  --color-navbar-ring: var(--navbar-ring);
 }
 
 :root {
@@ -145,6 +161,22 @@
   --background: oklch(1 0 0);
 
   --foreground: oklch(0.129 0.042 264.695);
+
+  --navbar: oklch(0.984 0.003 247.858);
+
+  --navbar-foreground: oklch(0.129 0.042 264);
+
+  --navbar-primary: oklch(0.208 0.042 265);
+
+  --navbar-primary-foreground: oklch(0.984 0.003 247);
+
+  --navbar-accent: oklch(0.924 0.009 258);
+
+  --navbar-accent-foreground: oklch(0.208 0.042 265);
+
+  --navbar-border: oklch(0.929 0.013 255);
+
+  --navbar-ring: oklch(0.704 0.04 256.788);
 }
 
 .dark {
@@ -210,6 +242,22 @@
   --sidebar-border: oklch(1 0 0 / 10%);
 
   --sidebar-ring: oklch(0.551 0.027 264.364);
+
+  --navbar: oklch(0.208 0.042 265.755);
+
+  --navbar-foreground: oklch(0.984 0.003 247.858);
+
+  --navbar-primary: oklch(0.488 0.243 264.376);
+
+  --navbar-primary-foreground: oklch(0.984 0.003 247.858);
+
+  --navbar-accent: oklch(0.279 0.041 260.031);
+
+  --navbar-accent-foreground: oklch(0.984 0.003 247.858);
+
+  --navbar-border: oklch(1 0 0 / 10%);
+
+  --navbar-ring: oklch(0.551 0.027 264.364);
 }
 
 @layer base {

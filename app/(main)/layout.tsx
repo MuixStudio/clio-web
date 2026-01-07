@@ -30,7 +30,7 @@ export default function MainLayout({
                   <AppSidebar />
                   <SidebarInset className="h-full">
                     {/*header*/}
-                    <header className="sticky top-0 z-50 flex h-12 shrink-0 items-center border-b border-border gap-2 transition-width ease-linear bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                    <header className="z-50 flex h-10 shrink-0 items-center border-b border-border gap-2 transition-width ease-linear bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                       <div className="flex items-center gap-2 px-4">
                         <SidebarTrigger className="-ml-1" />
                         <Separator
