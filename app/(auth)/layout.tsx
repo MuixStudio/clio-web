@@ -1,18 +1,14 @@
 import "@ory/elements-react/theme/styles.css";
 import { Suspense } from "react";
 
+import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
+
 export default function LoginPage({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-      <div className="flex w-full max-w-sm flex-col gap-6">
-        {/*<div className="flex items-center gap-2 self-center font-medium">*/}
-        {/*  <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">*/}
-        {/*    <GalleryVerticalEnd className="size-4" />*/}
-        {/*  </div>*/}
-        {/*  Acme Inc.*/}
-        {/*</div>*/}
+    <div className="mx-auto h-screen w-full relative">
+      <BackgroundBeamsWithCollision className="md:h-full">
         <Suspense fallback={<div>加载中。。。</div>}>{children}</Suspense>
-      </div>
+      </BackgroundBeamsWithCollision>
     </div>
   );
 }

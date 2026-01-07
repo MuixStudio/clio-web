@@ -85,7 +85,7 @@ export const AppSidebar: React.FC = ({
   };
 
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar className="relative" collapsible="icon" {...props}>
       <SidebarHeader>
         <TenantSwitcher
           currentTenantId={currentTenant.tenant_id}

@@ -38,16 +38,14 @@ export default function RootLayout({
       </head>
       <body
         className={clsx(
-          "min-h-screen text-foreground bg-background font-sans antialiased",
+          "h-full text-foreground bg-background font-sans antialiased select-auto overflow-hidden",
           fontSans.variable,
         )}
       >
-        <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          <div className="relative flex flex-col h-screen">
-            <main className="container mx-auto h-full max-w-full flex-grow">
-              {children}
-            </main>
-          </div>
+        <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
+          <main className="max-h-screen max-w-full">
+            {children}
+          </main>
           <Toaster />
         </Providers>
       </body>
