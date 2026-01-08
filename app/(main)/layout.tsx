@@ -9,7 +9,7 @@ import {
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { MenuProvider } from "@/components/sidebar/nav-main";
 import { AppContextProvider } from "@/contexts/app-context";
-import { Navbar } from "@/components/navbar/navbar";
+import { AppNavbar } from "@/components/navbar/navbar";
 
 export default function MainLayout({
   children,
@@ -21,7 +21,7 @@ export default function MainLayout({
   return (
     <SessionProvider baseUrl={baseUrl}>
       <div className="flex flex-col h-screen">
-        <Navbar />
+        <AppNavbar />
         <div className="flex-1 overflow-auto">
           <div className="h-full">
             <AppContextProvider>
@@ -30,7 +30,7 @@ export default function MainLayout({
                   <AppSidebar />
                   <SidebarInset className="h-full">
                     {/*header*/}
-                    <header className="z-50 flex h-10 shrink-0 items-center border-b border-border gap-2 transition-width ease-linear bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                    <header className="z-10 flex h-10 shrink-0 items-center border-b border-border gap-2 transition-width ease-linear bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                       <div className="flex items-center gap-2 px-4">
                         <SidebarTrigger className="-ml-1" />
                         <Separator

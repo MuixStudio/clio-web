@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 
+import React from "react";
+
 /**
  * 侧边栏导航菜单项类型
  */
@@ -22,34 +24,20 @@ export interface NavItem {
 }
 
 export interface NavGroup {
-  name: string;
   items: NavItem[];
 }
 
 export interface Menu {
+  header?: MenuHeader;
+  footer?: MenuFooter;
   navGroups: NavGroup[];
 }
 
-/**
- * 侧边栏项目类型
- */
-export interface Project {
-  /** 项目名称 */
-  name: string;
-  /** 项目链接 */
-  url: string;
-  /** 项目图标 */
-  icon: LucideIcon;
+export interface MenuHeader {
+  title: string;
+  element?: React.ReactNode;
 }
 
-/**
- * 侧边栏用户信息类型
- */
-export interface SidebarUser {
-  /** 用户名 */
-  name: string;
-  /** 用户邮箱 */
-  email: string;
-  /** 用户头像URL */
-  avatar: string;
+export interface MenuFooter {
+  element?: React.ReactNode;
 }

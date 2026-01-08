@@ -1,13 +1,227 @@
-import * as React from "react";
+"use client";
 
-export const Navbar: React.FC = ({
-  ...props
-}: React.ComponentProps<typeof Navbar>) => {
+import * as React from "react";
+import Link from "next/link";
+import { CircleAlertIcon, HomeIcon, FileTextIcon, LayoutGridIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Navbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  NavbarMenu,
+  NavbarMenuContent,
+  NavbarMenuFooter,
+  NavbarMenuGroup,
+  NavbarMenuGroupLabel,
+  NavbarMenuHeader,
+  NavbarMenuItem,
+  NavbarProvider,
+  NavbarSeparator,
+  NavbarSpacer,
+  NavbarToggle,
+} from "@/components/ui/navbar";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+
+export function AppNavbar() {
   return (
-    <>
-      <header className="w-full h-14 bg-navbar border-b border-border">
-        <div className="">ddd</div>
-      </header>
-    </>
+    <NavbarProvider>
+      <Navbar position="sticky" blur="md">
+        {/* Mobile Toggle */}
+        <NavbarToggle className="md:hidden" />
+
+        {/* Logo */}
+        <NavbarBrand>
+          <Link className="flex items-center gap-2 font-semibold" href="/">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <HomeIcon className="size-4" />
+            </div>
+            <span className="hidden sm:inline-block">Clio</span>
+          </Link>
+        </NavbarBrand>
+
+        {/* Desktop Navigation - Center */}
+        <NavbarContent className="hidden md:flex" justify="center">
+          <DesktopNavigation />
+        </NavbarContent>
+
+        {/* Spacer pushes actions to the right */}
+        <NavbarSpacer />
+
+        {/* Right Actions */}
+        <NavbarContent justify="end">
+          <NavbarItem>
+            <Button size="sm" variant="ghost">
+              Sign In
+            </Button>
+          </NavbarItem>
+          <NavbarItem>
+            <Button size="sm">
+              Get Started
+            </Button>
+          </NavbarItem>
+        </NavbarContent>
+      </Navbar>
+
+      {/* Mobile Menu */}
+      <NavbarMenu side="left">
+        <NavbarMenuHeader>
+          <Link className="flex items-center gap-2 font-semibold" href="/">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <HomeIcon className="size-4" />
+            </div>
+            <span>Clio</span>
+          </Link>
+        </NavbarMenuHeader>
+
+        <NavbarMenuContent>
+          <NavbarMenuGroup>
+            <NavbarMenuGroupLabel>Navigation</NavbarMenuGroupLabel>
+            <NavbarMenuItem asChild>
+              <Link href="/">
+                <HomeIcon className="size-4" />
+                Home
+              </Link>
+            </NavbarMenuItem>
+            <NavbarMenuItem asChild>
+              <Link href="/docs">
+                <FileTextIcon className="size-4" />
+                Documentation
+              </Link>
+            </NavbarMenuItem>
+            <NavbarMenuItem asChild>
+              <Link href="/components">
+                <LayoutGridIcon className="size-4" />
+                Components
+              </Link>
+            </NavbarMenuItem>
+          </NavbarMenuGroup>
+
+          <NavbarSeparator />
+
+          <NavbarMenuGroup>
+            <NavbarMenuGroupLabel>Status</NavbarMenuGroupLabel>
+            <NavbarMenuItem asChild>
+              <Link href="#">
+                <CircleAlertIcon className="size-4" />
+                Backlog
+              </Link>
+            </NavbarMenuItem>
+            <NavbarMenuItem asChild>
+              <Link href="#">
+                <CircleAlertIcon className="size-4" />
+                To Do
+              </Link>
+            </NavbarMenuItem>
+            <NavbarMenuItem asChild>
+              <Link href="#">
+                <CircleAlertIcon className="size-4" />
+                Done
+              </Link>
+            </NavbarMenuItem>
+          </NavbarMenuGroup>
+        </NavbarMenuContent>
+
+        <NavbarMenuFooter>
+          <div className="flex flex-col gap-2">
+            <Button className="w-full" variant="outline">
+              Sign In
+            </Button>
+            <Button className="w-full">
+              Get Started
+            </Button>
+          </div>
+        </NavbarMenuFooter>
+      </NavbarMenu>
+    </NavbarProvider>
   );
-};
+}
+
+function DesktopNavigation() {
+  return (
+    <NavigationMenu viewport={false}>
+      <NavigationMenuList>
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+            <Link href="/docs">Documentation</Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuTrigger>Components</NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <ul className="w-72">
+              <li>
+                <NavigationMenuLink asChild>
+                  <Link href="#">
+                    <div className="flex flex-col">
+                      <div className="font-medium">All Components</div>
+                      <div className="text-muted-foreground">
+                        Browse all components in the library.
+                      </div>
+                    </div>
+                  </Link>
+                </NavigationMenuLink>
+                <NavigationMenuLink asChild>
+                  <Link href="#">
+                    <div className="flex flex-col">
+                      <div className="font-medium">Primitives</div>
+                      <div className="text-muted-foreground">
+                        Low-level building blocks.
+                      </div>
+                    </div>
+                  </Link>
+                </NavigationMenuLink>
+                <NavigationMenuLink asChild>
+                  <Link href="#">
+                    <div className="flex flex-col">
+                      <div className="font-medium">Patterns</div>
+                      <div className="text-muted-foreground">
+                        Common UI patterns and layouts.
+                      </div>
+                    </div>
+                  </Link>
+                </NavigationMenuLink>
+              </li>
+            </ul>
+          </NavigationMenuContent>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <ul className="grid w-[200px]">
+              <li>
+                <NavigationMenuLink asChild>
+                  <Link className="flex-row items-center gap-2" href="#">
+                    <CircleAlertIcon />
+                    Blog
+                  </Link>
+                </NavigationMenuLink>
+                <NavigationMenuLink asChild>
+                  <Link className="flex-row items-center gap-2" href="#">
+                    <CircleAlertIcon />
+                    Changelog
+                  </Link>
+                </NavigationMenuLink>
+                <NavigationMenuLink asChild>
+                  <Link href="#">
+                    <CircleAlertIcon />
+                    GitHub
+                  </Link>
+                </NavigationMenuLink>
+              </li>
+            </ul>
+          </NavigationMenuContent>
+        </NavigationMenuItem>
+      </NavigationMenuList>
+    </NavigationMenu>
+  );
+}

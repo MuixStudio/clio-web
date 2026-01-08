@@ -12,7 +12,7 @@ const config: OryClientConfiguration = {
     default_redirect_url: "/",
     error_ui_url: "/error",
     locale_behavior: "force_default",
-    name: "Welcome to Clio",
+    name: "Clio",
     registration_enabled: true,
     verification_enabled: true,
     recovery_enabled: true,
